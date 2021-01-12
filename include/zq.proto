@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package com.zq.proto.msg;
+
+enum MSG_ID_NOTIFY_TYPE {
+	MSG_ID_NOTIFY_NULL = 0;
+	MSG_ID_NOTIFY_MSG = 1; //消息
+	MSG_ID_NOTIFY_USER_ADD = 11; //新增
+	MSG_ID_NOTIFY_USER_REMOVE = 12; //删除
+	MSG_ID_NOTIFY_USER_UPDATE = 13; //更新
+	MSG_ID_NOTIFY_DB_CREATE = 101; //DB创建
+	MSG_ID_NOTIFY_DB_DELETE = 102; //DB删除
+	MSG_ID_NOTIFY_TB_INIT = 201; //TB初始化
+	MSG_ID_NOTIFY_TB_DROP = 202; //TB删除
+	MSG_ID_NOTIFY_TB_META = 203; //TB更新数据元信息
+	MSG_ID_NOTIFY_TB_ATTR = 204; //TB更新数据属性信息
+	MSG_ID_NOTIFY_TB_INSERT = 205; //TB插入数据内容
+	MSG_ID_NOTIFY_TB_APPEND = 206; //TB追加数据内容
+	MSG_ID_NOTIFY_TB_UPDATE = 207; //TB更新数据内容
+	MSG_ID_NOTIFY_TB_REMOVE = 208; //TB删除数据内容
+	MSG_ID_NOTIFY_TB_UPDATE_FIELD = 209; //TB更新数据内容
+
+	MSG_ID_NOTIFY_TD_ORDER_INSERT = 301; //新增订单
+	MSG_ID_NOTIFY_TD_ORDER_CANCEL = 302; //撤销订单
+}
+
+enum MSG_ID_REQUEST_DO_TYPE {
+	MSG_ID_REQUEST_DO_NULL = 0;
+	MSG_ID_REQUEST_DO_MSG = 1; //消息
+	MSG_ID_REQUEST_DO_USER_ADD = 11; //新增
+	MSG_ID_REQUEST_DO_USER_REMOVE = 12; //删除
+	MSG_ID_REQUEST_DO_USER_UPDATE = 13; //更新
+	MSG_ID_REQUEST_DO_DB_CREATE = 101; //DB创建
+	MSG_ID_REQUEST_DO_DB_DELETE = 102; //DB删除
+	MSG_ID_REQUEST_DO_TB_INIT = 201; //TB初始化
+	MSG_ID_REQUEST_DO_TB_DROP = 202; //TB删除
+	MSG_ID_REQUEST_DO_TB_META = 203; //TB更新数据元信息
+	MSG_ID_REQUEST_DO_TB_ATTR = 204; //TB更新数据属性信息
+	MSG_ID_REQUEST_DO_TB_INSERT = 205; //TB插入数据内容
+	MSG_ID_REQUEST_DO_TB_APPEND = 206; //TB追加数据内容
+	MSG_ID_REQUEST_DO_TB_UPDATE = 207; //TB更新数据内容
+	MSG_ID_REQUEST_DO_TB_REMOVE = 208; //TB删除数据内容
+	MSG_ID_REQUEST_DO_TB_UPDATE_FIELD = 209; //TB更新数据内容
+
+	MSG_ID_REQUEST_DO_TD_ORDER_INSERT = 301; //新增订单
+	MSG_ID_REQUEST_DO_TD_ORDER_CANCEL = 302; //撤销订单
+}
+
+enum MSG_ID_REQUEST_QUERY_TYPE {
+	MSG_ID_REQUEST_QUERY_NULL = 0;
+	MSG_ID_REQUEST_QUERY_USER = 10; //USER
+	MSG_ID_REQUEST_QUERY_DB = 100; //DB
+	MSG_ID_REQUEST_QUERY_TB = 200; //TB
+}
+
+message Variant {
+	oneof variant {
+		uint64 u64 = 1;
+		sint64 i64 = 2;
+		double f = 3;
+		string str = 4;
+		bytes data = 5;
+	}
+}
+
+message VarMessage {
+	int32 type = 1; //消息类型
+	int32 id = 2; //消息ID
+	map<string, Variant> param = 3; // 参数param里应该有数据类型字段标识attr、data里是什么数据，比如二进制、json、xml等等
+}
+
