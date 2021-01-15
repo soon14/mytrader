@@ -142,7 +142,7 @@ IF(WIN32)
 	#SET (EXTRA_LIBS ${EXTRA_LIBS} wxmsw31u_html.lib wxmsw31u_aui.lib wxmsw31u_ribbon.lib wxmsw31u_core.lib wxbase31u.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregexu.lib wxexpat.lib)
 	#ENDIF()
 
-	SET (EXTRA_LIBS ${EXTRA_LIBS} mdb zq calc view
+	SET (EXTRA_LIBS ${EXTRA_LIBS} mdb zq calc view techview
 	#mysqlcppconn 
 	#jwtd libeay32 ssleay32
 	kernel32.lib
@@ -166,7 +166,7 @@ IF(WIN32)
 ELSE()
 	INCLUDE_DIRECTORIES(../../local ../../local/include ../../mdb/include ../include ../src)
 	LINK_DIRECTORIES(../../local/lib64 ../../local/lib ${CMAKE_SOURCE_DIR}/bin/${CMAKE_SYSTEM_NAME}/${PLATFORM})
-	SET (EXTRA_LIBS ${EXTRA_LIBS} mdb zq calc view
+	SET (EXTRA_LIBS ${EXTRA_LIBS} mdb zq calc view techview
 	#mysqlcppconn jwt 
 	#crypto ssl 
 	pthread dl
@@ -191,7 +191,7 @@ ENDIF()
 # taskbar.cpp
 # sample.rc
 # )
-# TARGET_LINK_LIBRARIES(zqapp ${EXTRA_LIBS})
+# TARGET_LINK_LIBRARIES(zqapp PRIVATE ${EXTRA_LIBS})
 
 ADD_EXECUTABLE(mytrader
 base.cpp

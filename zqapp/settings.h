@@ -1,7 +1,7 @@
 #pragma once
 
 #include "utility.h"
-#include <view.h>
+#include <techview.h>
 
 class SkinInfo : public zqdb::SkinInfo
 {

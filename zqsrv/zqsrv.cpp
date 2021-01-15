@@ -24,9 +24,9 @@ extern "C" {
 
 	void OnMDBNotify(HMDB hdb, HMTABLE htb, MDB_NOTIFY_DATA* notify)
 	{
-		if (hdb && htb) {
+		/*if (hdb && htb) {
 			printf("%s %s %d\n", MDBGetName(hdb), MDBTableGetName(hdb, htb), notify->notify);
-		}
+		}*/
 	}
 }
 
