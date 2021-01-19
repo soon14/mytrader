@@ -598,7 +598,7 @@ typedef struct tagCodeInfo
 	 char Investor[MAX_NAME_LENGTH + 1]; //投资者代码
 	 char User[MAX_NAME_LENGTH + 1]; //用户代码
 	 char Exchange[MAX_NAME_LENGTH + 1]; //市场
-	 char Code[MAX_NAME_LENGTH + 1]; //代码
+	 char Code[MAX_CODE_LENGTH + 1]; //代码
 	 char Currency; //币种 CURRENCY_CNY
 	 double Price; //价格
 	 double Volume;  //量
@@ -613,7 +613,7 @@ typedef struct tagCodeInfo
 	 char User[MAX_NAME_LENGTH + 1]; //用户代码
 	 char Order[MAX_NAME_LENGTH + 1]; //订单ID
 	 char Exchange[MAX_NAME_LENGTH + 1]; //市场
-	 char Code[MAX_NAME_LENGTH + 1]; //代码
+	 char Code[MAX_CODE_LENGTH + 1]; //代码
 	 char Currency; //币种 CURRENCY_CNY
 	 double Price; //价格
 	 double Volume; //量
@@ -632,7 +632,7 @@ typedef struct tagCodeInfo
 	 char User[MAX_NAME_LENGTH + 1]; //用户代码
 	 char Trade[MAX_NAME_LENGTH + 1]; //成交ID
 	 char Exchange[MAX_NAME_LENGTH + 1]; //市场
-	 char Code[MAX_NAME_LENGTH + 1]; //代码
+	 char Code[MAX_CODE_LENGTH + 1]; //代码
 	 char Currency; //币种 CURRENCY_CNY	
 	 double Price; //价格
 	 double Volume; //量
@@ -730,6 +730,12 @@ ZQDB_API_EXPORT HZQDB ZQDBGetCode(const char* code);
 
 ZQDB_API_EXPORT size_t ZQDBGetAllModuleCount();
 ZQDB_API_EXPORT size_t ZQDBGetAllModule(HZQDB* module, size_t count);
+
+ZQDB_API_EXPORT MDB_STATUS ZQDBBeginModuleNewTradingDay(HZQDB module, uint32_t tradingday);
+//具体更新由对应模块自行实现，基本上是等待一下，先清理数据（委托、持仓、成交等数据），然后更新委托、持仓、成交等数据
+ZQDB_API_EXPORT void ZQDBDoModuleNewTradingDayClear(HZQDB module, uint32_t tradingday);
+ZQDB_API_EXPORT void ZQDBEndModuleNewTradingDay(HZQDB module, uint32_t tradingday);
+
 ZQDB_API_EXPORT HZQDB ZQDBUpdateOrInitModule(MODULEINFO* module);
 
 ZQDB_API_EXPORT HZQDB ZQDBUpdateOrInitUser(HZQDB module, MDB_FIELD* field, size_t field_num, tagUserInfo* user, size_t max_count);
@@ -757,8 +763,11 @@ ZQDB_API_EXPORT size_t ZQDBGetOrder(HZQDB h, HZQDB* order, size_t count);
 ZQDB_API_EXPORT size_t ZQDBGetTradeCount(HZQDB h);
 ZQDB_API_EXPORT size_t ZQDBGetTrade(HZQDB h, HZQDB* trade, size_t count);
 
+ZQDB_API_EXPORT bool ZQDBIsDisable(HZQDB h);
+
 ZQDB_API_EXPORT HZQDB ZQDBGetParent(HZQDB h);
 ZQDB_API_EXPORT void* ZQDBGetValue(HZQDB h);
+ZQDB_API_EXPORT MDB_STATUS ZQDBNormalizeField(HZQDB h, ZQDB_HANDLE_TYPE child, MDB_FIELD* field, size_t field_num);
 ZQDB_API_EXPORT MDB_STATUS ZQDBGetFieldValue(HZQDB h, MDB_FIELD* field, size_t field_num, char* data);
 ZQDB_API_EXPORT MDB_STATUS ZQDBGetFieldAsInt(HZQDB h, MDB_FIELD* field, size_t field_num, ssize_t* value);
 ZQDB_API_EXPORT MDB_STATUS ZQDBGetFieldAsDouble(HZQDB h, MDB_FIELD* field, size_t field_num, double* value);
@@ -788,10 +797,23 @@ ZQDB_API_EXPORT MDB_STATUS ZQDBReqLogout(HZQDB h, NET_MSG* msg, NET_MSG** rsp, s
 ZQDB_API_EXPORT MDB_STATUS ZQDBReqNewOrder(HZQDB h, NET_MSG* msg, NET_MSG** rsp, size_t timeout);
 ZQDB_API_EXPORT MDB_STATUS ZQDBReqCancelOrder(HZQDB h, NET_MSG* msg, NET_MSG** rsp, size_t timeout);
 
-//ZQDB_API_EXPORT HZQDB ZQDBNotifyIsExchange(HMDB hdb, HMTABLE htb, MDB_NOTIFY_DATA* notify);
-//ZQDB_API_EXPORT HZQDB ZQDBNotifyIsProduct(HMDB hdb, HMTABLE htb, MDB_NOTIFY_DATA* notify);
-//ZQDB_API_EXPORT HZQDB ZQDBNotifyGetCode(HZQDB h, size_t pos);
-ZQDB_API_EXPORT HZQDB ZQDBNotifyGetHandle(HMDB hdb, HMTABLE htb, MDB_NOTIFY_DATA* notify, size_t offset);
+typedef void(*ZQDB_NOTIFY_ENABLE_CB)(HZQDB h, void* data);
+typedef void(*ZQDB_NOTIFY_DISABLE_CB)(HZQDB h, void* data);
+typedef void(*ZQDB_NOTIFY_APPEND_CB)(HZQDB h, void* data);
+typedef void(*ZQDB_NOTIFY_REMOVE_CB)(HZQDB h, void* data);
+typedef void(*ZQDB_NOTIFY_UPDATE_CB)(HZQDB h, void* data);
+
+struct ZQDB_NOTIFY_INF
+{
+	void* data;
+	ZQDB_NOTIFY_ENABLE_CB enable_cb;
+	ZQDB_NOTIFY_DISABLE_CB disable_cb;
+	ZQDB_NOTIFY_APPEND_CB append_cb;
+	ZQDB_NOTIFY_REMOVE_CB remove_cb;
+	ZQDB_NOTIFY_UPDATE_CB update_cb;
+};
+
+ZQDB_API_EXPORT void ZQDBNotifyDispatch(const ZQDB_NOTIFY_INF& inf, HMDB hdb, HMTABLE htb, MDB_NOTIFY_DATA* notify);
 
 typedef struct ZQDB_VIEW_INF
 {
@@ -999,10 +1021,14 @@ namespace zqdb {
 		inline void* GetValue() { return ZQDBGetValue(h_); }
 		//inline const char* GetCode() { return ZQDBGetCode(h_); }
 
+		inline MDB_STATUS NormalizeField(MDB_FIELD* field, size_t field_num, ZQDB_HANDLE_TYPE child = ZQDB_HANDLE_TYPE_UNKNOWN) { return ZQDBNormalizeField(h_, child, field, field_num); }
 		inline MDB_STATUS GetFieldValue(MDB_FIELD* field, size_t field_num, char* data) { return ZQDBGetFieldValue(h_, field, field_num, data); }
 		inline MDB_STATUS GetFieldAsInt(MDB_FIELD* field, size_t field_num, ssize_t* value) { return ZQDBGetFieldAsInt(h_, field, field_num, value); }
 		inline MDB_STATUS GetFieldAsDouble(MDB_FIELD* field, size_t field_num, double* value) { return ZQDBGetFieldAsDouble(h_, field, field_num, value); }
 		inline MDB_STATUS GetFieldAsStr(MDB_FIELD* field, size_t field_num, char** data, size_t* size, const char* format = nullptr) { return ZQDBGetFieldAsStr(h_, field, field_num, data, size, format); }
+		inline MDB_STATUS NormalizeField(MDB_FIELD& field, ZQDB_HANDLE_TYPE child = ZQDB_HANDLE_TYPE_UNKNOWN) {
+			return NormalizeField(&field, 1, child);
+		}
 		inline MDB_STATUS GetFieldValue(MDB_FIELD& field, char* data) {
 			return GetFieldValue(&field, 1, data);
 		}
@@ -1089,6 +1115,28 @@ namespace zqdb {
 		size_t GetKDataMaxCount(PERIODTYPE cycle, size_t cycleex) { return ZQDBGetKDataMaxCount(h_, cycle, cycleex); }
 		size_t GetKDataCount(PERIODTYPE cycle, size_t cycleex, size_t* elem_sz = nullptr) { return ZQDBGetKDataCount(h_, cycle, cycleex, elem_sz); }
 		MDB_STATUS GetKDataValue(PERIODTYPE cycle, size_t cycleex, MDB_FIELD* field, size_t field_num, size_t pos, size_t num, void* data) { return ZQDBGetKDataValue(h_, cycle, cycleex, field, field_num, pos, num, data); }
+	};
+
+	template<class T>
+	class INotifyT
+	{
+	public:
+		void OnNotifyEnable(HZQDB h) { }
+		void OnNotifyDisable(HZQDB h) { }
+		void OnNotifyAppend(HZQDB h) { }
+		void OnNotifyRemove(HZQDB h) { }
+		void OnNotifyUpdate(HZQDB h) { }
+		void OnNotify(HMDB hdb, HMTABLE htb, MDB_NOTIFY_DATA* notify)
+		{
+			const ZQDB_NOTIFY_INF inf = { static_cast<T*>(this)
+				, [](HZQDB h, void* data) { ((T*)data)->OnNotifyEnable(h); }
+				, [](HZQDB h, void* data) { ((T*)data)->OnNotifyDisable(h); }
+				, [](HZQDB h, void* data) { ((T*)data)->OnNotifyAppend(h); }
+				, [](HZQDB h, void* data) { ((T*)data)->OnNotifyRemove(h); }
+				, [](HZQDB h, void* data) { ((T*)data)->OnNotifyUpdate(h); }
+			};
+			ZQDBNotifyDispatch(inf, hdb, htb, notify);
+		}
 	};
 
 	class Base {

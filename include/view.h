@@ -663,11 +663,6 @@ namespace zqdb {
 			h_ = h;
 			pT->OnHandleChanged();
 		}
-
-		void OnNotify(const wxString& name, int type, int pos, HZQDB h)
-		{
-
-		}
 	};
 
 	//////////////////////////////////////////////////////////////////////////
@@ -677,12 +672,14 @@ namespace zqdb {
 		: public TBase
 		, public SkinMap<T>
 		, public HandleMap<T>
+		, public INotifyT<T>
 	{
 		typedef BaseViewT<T, TBase> This;
 	public:
 		typedef TBase Base;
 		typedef SkinMap<T> SkinBase;
 		typedef HandleMap<T> HandleBase;
+		typedef INotifyT<T> NotifyBase;
 	protected:
 		int orient_ = 0;
 	public:
@@ -714,7 +711,7 @@ namespace zqdb {
 			Refresh();
 		}
 
-		void OnNotify(const wxString& name, int type, int pos, HZQDB h)
+		void OnNotifyUpdate(HZQDB h)
 		{
 			if (h == h_) {
 				Refresh();
@@ -810,7 +807,7 @@ namespace zqdb {
 
 		void OnSkinInfoChanged();
 
-		void OnNotify(const wxString& name, int type, int pos, HZQDB h);
+		void OnNotifyUpdate(HZQDB h);
 
 	protected:
 		void CalcBestSize();

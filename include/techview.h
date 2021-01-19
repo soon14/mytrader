@@ -907,7 +907,11 @@ namespace zqdb {
 		void OnSkinInfoChanged();
 		void OnCalcDataChanged();
 		void OnHandleChanged();
-		void OnNotify(const wxString& name, int type, int pos, HZQDB h);
+		void OnNotifyEnable(HZQDB h);
+		void OnNotifyDisable(HZQDB h);
+		void OnNotifyAppend(HZQDB h);
+		void OnNotifyRemove(HZQDB h);
+		void OnNotifyUpdate(HZQDB h);
 		void OnCalcDataUpdated();
 
 		inline bool IsDispOk() const {

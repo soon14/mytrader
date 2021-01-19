@@ -6,7 +6,11 @@
 
 // this is typically in a header: it just declares MY_EVENT event type
 wxDECLARE_EVENT(MY_EVENT, wxCommandEvent);
-wxDECLARE_EVENT(ZQDB_NOTIFY_EVENT, wxCommandEvent);
+wxDECLARE_EVENT(ZQDB_NOTIFY_ENABLE_EVENT, wxCommandEvent);
+wxDECLARE_EVENT(ZQDB_NOTIFY_DISABLE_EVENT, wxCommandEvent);
+wxDECLARE_EVENT(ZQDB_NOTIFY_APPEND_EVENT, wxCommandEvent);
+wxDECLARE_EVENT(ZQDB_NOTIFY_REMOVE_EVENT, wxCommandEvent);
+wxDECLARE_EVENT(ZQDB_NOTIFY_UPDATE_EVENT, wxCommandEvent);
 
 class MySmartKBDlg;
 class MyFrame;
@@ -38,7 +42,9 @@ private:
 class MyApp : public wxApp
 	, MyEventFilter
 	, public SettingsMap<MyApp>
+	, public zqdb::INotifyT<MyApp>
 {
+	typedef zqdb::INotifyT<MyApp> NotifyBase;
 protected:
 	wxTaskBarIcon *taskbaricon_ = nullptr; //œµÕ≥Õ–≈Ã
 #if defined(__WXOSX__) && wxOSX_USE_COCOA
@@ -66,6 +72,11 @@ public:
 	void OnGoto(wxCommandEvent& event);
 	void OnNotify(wxCommandEvent& event);
 
+	void OnNotifyEnable(HZQDB h);
+	void OnNotifyDisable(HZQDB h);
+	void OnNotifyAppend(HZQDB h);
+	void OnNotifyRemove(HZQDB h);
+	void OnNotifyUpdate(HZQDB h);
 	void OnNotify(HMDB hdb, HMTABLE htb, MDB_NOTIFY_DATA* notify);
 };
 

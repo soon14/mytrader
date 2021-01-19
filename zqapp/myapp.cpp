@@ -12,10 +12,15 @@
 #include "mytaskbar.h"
 #include "mysmartkbdlg.h"
 #include "myframe.h"
+#include <zq.pb.h>
 
 // this is a definition so can't be in a header
 wxDEFINE_EVENT(MY_EVENT, wxCommandEvent);
-wxDEFINE_EVENT(ZQDB_NOTIFY_EVENT, wxCommandEvent);
+wxDEFINE_EVENT(ZQDB_NOTIFY_ENABLE_EVENT, wxCommandEvent);
+wxDEFINE_EVENT(ZQDB_NOTIFY_DISABLE_EVENT, wxCommandEvent);
+wxDEFINE_EVENT(ZQDB_NOTIFY_APPEND_EVENT, wxCommandEvent);
+wxDEFINE_EVENT(ZQDB_NOTIFY_REMOVE_EVENT, wxCommandEvent);
+wxDEFINE_EVENT(ZQDB_NOTIFY_UPDATE_EVENT, wxCommandEvent);
 
 wxBitmap *gs_bmpNoMask = NULL,
 *gs_bmpWithColMask = NULL,
@@ -197,10 +202,10 @@ void MyApp::LoadSkinInfo()
 	if (skin_info_ptr->artProvider) {
 		skin_info_ptr->artProvider->GetColourScheme(&skin_info_ptr->crPrimary
 			, &skin_info_ptr->crSecondary, &skin_info_ptr->crTertiary);
-		skin_info_ptr->crViewBkgnd = skin_info_ptr->artProvider->GetColour(wxRIBBON_ART_PAGE_BACKGROUND_COLOUR);		//ï¿½ï¿½Í¼É«
-		skin_info_ptr->crCtrlBkgnd = skin_info_ptr->artProvider->GetColour(wxRIBBON_ART_TAB_CTRL_BACKGROUND_COLOUR);		//ï¿½Ø¼ï¿½É«
-		skin_info_ptr->crViewForgnd = skin_info_ptr->crTertiary;		//ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½
-		skin_info_ptr->crCtrlForgnd = skin_info_ptr->crTertiary;		//ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½
+		skin_info_ptr->crViewBkgnd = skin_info_ptr->artProvider->GetColour(wxRIBBON_ART_PAGE_BACKGROUND_COLOUR);		//ÊÓÍ¼É«
+		skin_info_ptr->crCtrlBkgnd = skin_info_ptr->artProvider->GetColour(wxRIBBON_ART_TAB_CTRL_BACKGROUND_COLOUR);		//¿Ø¼þÉ«
+		skin_info_ptr->crViewForgnd = skin_info_ptr->crTertiary;		//ÊÓÍ¼ÎÄ×Ö
+		skin_info_ptr->crCtrlForgnd = skin_info_ptr->crTertiary;		//ÊÓÍ¼ÎÄ×Ö
 	}
 	else {
 		skin_info_ptr->crPrimary.Set(194, 216, 241);
@@ -208,40 +213,40 @@ void MyApp::LoadSkinInfo()
 		skin_info_ptr->crTertiary.Set(0, 0, 0);
 		skin_info_ptr->crViewBkgnd.Set(201, 217, 237);
 		skin_info_ptr->crCtrlForgnd.Set(234, 242, 251);
-		skin_info_ptr->crViewForgnd = skin_info_ptr->crTertiary;		//ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½
-		skin_info_ptr->crCtrlForgnd = skin_info_ptr->crTertiary;		//ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½
+		skin_info_ptr->crViewForgnd = skin_info_ptr->crTertiary;		//ÊÓÍ¼ÎÄ×Ö
+		skin_info_ptr->crCtrlForgnd = skin_info_ptr->crTertiary;		//ÊÓÍ¼ÎÄ×Ö
 	}
 
 	skin_info_ptr->curDragLeftRight = wxCursor(wxCURSOR_SIZEWE);
 	skin_info_ptr->curDragUpDown = wxCursor(wxCURSOR_SIZENS);
 	skin_info_ptr->curDrawLine = wxCursor(wxCURSOR_PENCIL);
 	
-	skin_info_ptr->crBackgnd.Set(7, 7, 7);		//ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->crTabSelBackgnd.Set(64, 0, 0);	//ï¿½ï¿½Ç©Ñ¡ï¿½Ð±ï¿½ï¿½ï¿½
-	skin_info_ptr->crRptTitleBakcgnd.Set(27, 27, 27);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½â±³ï¿½ï¿½
-	skin_info_ptr->crRptSelBackgnd.Set(0, 0, 128);	//ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½Ð±ï¿½ï¿½ï¿½
+	skin_info_ptr->crBackgnd.Set(7, 7, 7);		//±³¾°
+	skin_info_ptr->crTabSelBackgnd.Set(64, 0, 0);	//±êÇ©Ñ¡ÖÐ±³¾°
+	skin_info_ptr->crRptTitleBakcgnd.Set(27, 27, 27);//±¨±í±êÌâ±³¾°
+	skin_info_ptr->crRptSelBackgnd.Set(0, 0, 128);	//±¨±íÑ¡ÖÐ±³¾°
 
-	skin_info_ptr->crTitle.Set(192, 192, 192);			//ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->crName.Set(192, 192, 192);			//ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->crText.Set(255, 255, 255);			//ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->crRising.Set(255, 62, 62);			//ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->crFalling.Set(84, 252, 84);		//ï¿½Âµï¿½
-	skin_info_ptr->crCommodityCode.Set(80, 248, 255);	//ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->crCommodityName.Set(252, 252, 84);	//ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->crAmount.Set(252, 252, 84);			//ï¿½ï¿½
-	skin_info_ptr->crVolume.Set(252, 252, 84);			//ï¿½ï¿½
-	skin_info_ptr->crTabSel.Set(84, 252, 252);			//ï¿½ï¿½Ç©Ñ¡ï¿½ï¿½
+	skin_info_ptr->crTitle.Set(192, 192, 192);			//±êÌâ
+	skin_info_ptr->crName.Set(192, 192, 192);			//Ãû³Æ
+	skin_info_ptr->crText.Set(255, 255, 255);			//ÎÄ×Ö
+	skin_info_ptr->crRising.Set(255, 62, 62);			//ÉÏÕÇ
+	skin_info_ptr->crFalling.Set(84, 252, 84);		//ÏÂµø
+	skin_info_ptr->crCommodityCode.Set(80, 248, 255);	//´úÂë
+	skin_info_ptr->crCommodityName.Set(252, 252, 84);	//Ãû³Æ
+	skin_info_ptr->crAmount.Set(252, 252, 84);			//¼Û
+	skin_info_ptr->crVolume.Set(252, 252, 84);			//Á¿
+	skin_info_ptr->crTabSel.Set(84, 252, 252);			//±êÇ©Ñ¡ÖÐ
 
-	skin_info_ptr->crLine.Set(255, 255, 255);			//ï¿½ï¿½
-	skin_info_ptr->crAverageLine.Set(252, 252, 84);	//ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->crDrawLine.Set(255, 0, 255);		//ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->crXYLine.Set(60, 60, 60);			//Xï¿½ï¿½Yï¿½Ö¸ï¿½ï¿½ï¿½
-	skin_info_ptr->crXText.Set(125, 125, 125);			//Xï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->crYText.Set(125, 125, 125);//QCOLOR_DEF_YAXIS_VALUE;			//Yï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->crCrossCursor.Set(122, 122, 122);	//Ê®ï¿½ï¿½ï¿½Î±ï¿½	
-	skin_info_ptr->crRptLine.Set(81, 81, 81);		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->crRisingLine.Set(255, 52, 52);		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->crFallingLine.Set(84, 252, 252);	//ï¿½Âµï¿½ï¿½ï¿½
+	skin_info_ptr->crLine.Set(255, 255, 255);			//Ïß
+	skin_info_ptr->crAverageLine.Set(252, 252, 84);	//¾ùÏß
+	skin_info_ptr->crDrawLine.Set(255, 0, 255);		//»­Ïß
+	skin_info_ptr->crXYLine.Set(60, 60, 60);			//X¡¢Y·Ö¸ôÏß
+	skin_info_ptr->crXText.Set(125, 125, 125);			//X×ø±êÎÄ×Ö
+	skin_info_ptr->crYText.Set(125, 125, 125);//QCOLOR_DEF_YAXIS_VALUE;			//Y×ø±êÎÄ×Ö
+	skin_info_ptr->crCrossCursor.Set(122, 122, 122);	//Ê®×ÖÓÎ±ê	
+	skin_info_ptr->crRptLine.Set(81, 81, 81);		//±¨±íÏß
+	skin_info_ptr->crRisingLine.Set(255, 52, 52);		//ÉÏÕÇÏß
+	skin_info_ptr->crFallingLine.Set(84, 252, 252);	//ÏÂµøÏß
 	skin_info_ptr->crILine[0].Set(252, 252, 252);
 	skin_info_ptr->crILine[1].Set(252, 252, 84);
 	skin_info_ptr->crILine[2].Set(252, 84, 252);
@@ -253,26 +258,26 @@ void MyApp::LoadSkinInfo()
 	skin_info_ptr->crRefline.Set(60, 60, 60);
 	skin_info_ptr->crOrderLine.Set(60, 60, 60);
 
-	skin_info_ptr->penLine = wxPen(skin_info_ptr->crLine, 1);			//ï¿½ï¿½
-	skin_info_ptr->penAverageLine = wxPen(skin_info_ptr->crAverageLine, 1);	//ï¿½ï¿½ï¿½ï¿½
-	//skin_info_ptr->penDrawLine = wxPen(skin_info_ptr->crDrawLine, 1);		//ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->penXYLine = wxPen(skin_info_ptr->crXYLine, 1);		//Xï¿½ï¿½Yï¿½Ö¸ï¿½ï¿½ï¿½
-	skin_info_ptr->penXText = wxPen(skin_info_ptr->crXText, 1);			//Xï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->penYText = wxPen(skin_info_ptr->crYText, 1);			//Yï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	//skin_info_ptr->penCrossCursor = wxPen(skin_info_ptr->crCrossCursor, 1);	//Ê®ï¿½ï¿½ï¿½Î±ï¿½	
-	skin_info_ptr->penRptLine = wxPen(skin_info_ptr->crRptLine, 1);		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->penRisingLine = wxPen(skin_info_ptr->crRisingLine, 1);	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->penFallingLine = wxPen(skin_info_ptr->crFallingLine, 1);	//ï¿½Âµï¿½ï¿½ï¿½
-	skin_info_ptr->penILine[0] = wxPen(skin_info_ptr->crILine[0], 1);		//Ö¸ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->penILine[1] = wxPen(skin_info_ptr->crILine[1], 1);		//Ö¸ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->penILine[2] = wxPen(skin_info_ptr->crILine[2], 1);		//Ö¸ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->penILine[3] = wxPen(skin_info_ptr->crILine[3], 1);		//Ö¸ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->penILine[4] = wxPen(skin_info_ptr->crILine[4], 1);		//Ö¸ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->penILine[5] = wxPen(skin_info_ptr->crILine[5], 1);		//Ö¸ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->penILine[6] = wxPen(skin_info_ptr->crILine[6], 1);		//Ö¸ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->penILine[7] = wxPen(skin_info_ptr->crILine[7], 1);		//Ö¸ï¿½ï¿½ï¿½ï¿½
-	skin_info_ptr->penRefline = wxPen(skin_info_ptr->crRefline, 0, wxPENSTYLE_DOT);		//ï¿½Î¿ï¿½ï¿½ï¿½
-	skin_info_ptr->penOrderLine = wxPen(skin_info_ptr->crOrderLine, 1);		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	skin_info_ptr->penLine = wxPen(skin_info_ptr->crLine, 1);			//Ïß
+	skin_info_ptr->penAverageLine = wxPen(skin_info_ptr->crAverageLine, 1);	//¾ùÏß
+	//skin_info_ptr->penDrawLine = wxPen(skin_info_ptr->crDrawLine, 1);		//»­Ïß
+	skin_info_ptr->penXYLine = wxPen(skin_info_ptr->crXYLine, 1);		//X¡¢Y·Ö¸ôÏß
+	skin_info_ptr->penXText = wxPen(skin_info_ptr->crXText, 1);			//X×ø±êÎÄ×Ö
+	skin_info_ptr->penYText = wxPen(skin_info_ptr->crYText, 1);			//Y×ø±êÎÄ×Ö
+	//skin_info_ptr->penCrossCursor = wxPen(skin_info_ptr->crCrossCursor, 1);	//Ê®×ÖÓÎ±ê	
+	skin_info_ptr->penRptLine = wxPen(skin_info_ptr->crRptLine, 1);		//±¨±íÏß
+	skin_info_ptr->penRisingLine = wxPen(skin_info_ptr->crRisingLine, 1);	//ÉÏÕÇÏß
+	skin_info_ptr->penFallingLine = wxPen(skin_info_ptr->crFallingLine, 1);	//ÏÂµøÏß
+	skin_info_ptr->penILine[0] = wxPen(skin_info_ptr->crILine[0], 1);		//Ö¸±êÏß
+	skin_info_ptr->penILine[1] = wxPen(skin_info_ptr->crILine[1], 1);		//Ö¸±êÏß
+	skin_info_ptr->penILine[2] = wxPen(skin_info_ptr->crILine[2], 1);		//Ö¸±êÏß
+	skin_info_ptr->penILine[3] = wxPen(skin_info_ptr->crILine[3], 1);		//Ö¸±êÏß
+	skin_info_ptr->penILine[4] = wxPen(skin_info_ptr->crILine[4], 1);		//Ö¸±êÏß
+	skin_info_ptr->penILine[5] = wxPen(skin_info_ptr->crILine[5], 1);		//Ö¸±êÏß
+	skin_info_ptr->penILine[6] = wxPen(skin_info_ptr->crILine[6], 1);		//Ö¸±êÏß
+	skin_info_ptr->penILine[7] = wxPen(skin_info_ptr->crILine[7], 1);		//Ö¸±êÏß
+	skin_info_ptr->penRefline = wxPen(skin_info_ptr->crRefline, 0, wxPENSTYLE_DOT);		//²Î¿¼Ïß
+	skin_info_ptr->penOrderLine = wxPen(skin_info_ptr->crOrderLine, 1);		//¶©µ¥Ïß
 	skin_info_ptr->pen = wxPen(skin_info_ptr->crLine, 1);
 	skin_info_ptr->penRising = wxPen(skin_info_ptr->crRisingLine, 1);
 	skin_info_ptr->penFalling = wxPen(skin_info_ptr->crFallingLine, 1);
@@ -292,25 +297,25 @@ void MyApp::LoadSkinInfo()
 
 	wxFont font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
 	skin_info_ptr->fontName = wxFont(14, font.GetFamily(), font.GetStyle(), font.GetWeight(), font.GetUnderlined()
-		, wxT("ï¿½ï¿½ï¿½ï¿½"));
+		, wxT("ËÎÌå"));
 	skin_info_ptr->fontText = wxFont(14, font.GetFamily(), font.GetStyle(), font.GetWeight(), font.GetUnderlined()
 		, wxT("system"));
 	skin_info_ptr->fontTabTitle = wxFont(13, font.GetFamily(), font.GetStyle(), font.GetWeight(), font.GetUnderlined()
-		, wxT("ï¿½ï¿½ï¿½ï¿½"));
+		, wxT("ËÎÌå"));
 	skin_info_ptr->fontRptTitle = wxFont(13, font.GetFamily(), font.GetStyle(), font.GetWeight(), font.GetUnderlined()
-		, wxT("ï¿½ï¿½ï¿½ï¿½"));
+		, wxT("ËÎÌå"));
 	skin_info_ptr->fontRptText = wxFont(13, font.GetFamily(), font.GetStyle(), font.GetWeight(), font.GetUnderlined()
-		, wxT("ï¿½ï¿½ï¿½ï¿½"));
+		, wxT("ËÎÌå"));
 	skin_info_ptr->fontTechTitle = wxFont(12, font.GetFamily(), font.GetStyle(), font.GetWeight(), font.GetUnderlined()
-		, wxT("ï¿½ï¿½ï¿½ï¿½"));
+		, wxT("ËÎÌå"));
 	skin_info_ptr->fontXText = wxFont(13, font.GetFamily(), font.GetStyle(), font.GetWeight(), font.GetUnderlined()
-		, wxT("ï¿½ï¿½ï¿½ï¿½"));
+		, wxT("ËÎÌå"));
 	skin_info_ptr->fontYText = wxFont(13, font.GetFamily(), font.GetStyle(), font.GetWeight(), font.GetUnderlined()
-		, wxT("ï¿½ï¿½ï¿½ï¿½"));
+		, wxT("ËÎÌå"));
 	skin_info_ptr->fontOrder = wxFont(13, font.GetFamily(), font.GetStyle(), font.GetWeight(), font.GetUnderlined()
-		, wxT("ï¿½ï¿½ï¿½ï¿½"));
+		, wxT("ËÎÌå"));
 
-	wxString strText = wxT("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½é½»ï¿½ï¿½ÏµÍ³");
+	wxString strText = wxT("¸ßËÙÐÐÇé½»Ò×ÏµÍ³");
 	dc.SetFont(skin_info_ptr->fontName);
 	skin_info_ptr->xyName = dc.GetTextExtent(strText);
 	skin_info_ptr->xyName.x /= strText.Length();
@@ -429,7 +434,7 @@ bool MyApp::OnInit()
     //in.cb = &ZQDB_NOTIFY;
     //ZQDB_API_Init(&in, &g_api);
 
-	//ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½Ò»ï¿½Â£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å»á´´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½
+	//µÚÒ»´ÎÐèÒªµ÷ÓÃÒ»ÏÂ£¬ÕâÑù²Å»á´´½¨¼ÆËãÄ£¿é
 	ZQDBUpdateCalc();
 
 	// Create the main window
@@ -442,7 +447,11 @@ bool MyApp::OnInit()
     //frame->Show(true);
 
 	Bind(MY_CMD_GOTO_EVENT, &MyApp::OnGoto, this);
-	Bind(ZQDB_NOTIFY_EVENT, &MyApp::OnNotify, this);
+	Bind(ZQDB_NOTIFY_ENABLE_EVENT, &MyApp::OnNotify, this);
+	Bind(ZQDB_NOTIFY_DISABLE_EVENT, &MyApp::OnNotify, this);
+	Bind(ZQDB_NOTIFY_APPEND_EVENT, &MyApp::OnNotify, this);
+	Bind(ZQDB_NOTIFY_REMOVE_EVENT, &MyApp::OnNotify, this);
+	Bind(ZQDB_NOTIFY_UPDATE_EVENT, &MyApp::OnNotify, this);
 
     return true;
 }
@@ -452,6 +461,8 @@ int MyApp::OnExit()
 	DeleteBitmaps();
 
 	ZQCalcStop();
+
+	google::protobuf::ShutdownProtobufLibrary();
 
     return wxApp::OnExit();
 }
@@ -556,9 +567,59 @@ void MyApp::OnNotify(wxCommandEvent& event)
 	}
 }
 
+void MyApp::OnNotifyEnable(HZQDB h)
+{
+	auto event = new wxCommandEvent(ZQDB_NOTIFY_ENABLE_EVENT);
+	//event->SetString(table);
+	//event->SetInt(type);
+	//event->SetExtraLong(offset);
+	event->SetClientData(h);
+	wxGetApp().QueueEvent(event);
+}
+
+void MyApp::OnNotifyDisable(HZQDB h)
+{
+	auto event = new wxCommandEvent(ZQDB_NOTIFY_DISABLE_EVENT);
+	//event->SetString(table);
+	//event->SetInt(type);
+	//event->SetExtraLong(offset);
+	event->SetClientData(h);
+	wxGetApp().QueueEvent(event);
+}
+
+void MyApp::OnNotifyAppend(HZQDB h)
+{
+	auto event = new wxCommandEvent(ZQDB_NOTIFY_APPEND_EVENT);
+	//event->SetString(table);
+	//event->SetInt(type);
+	//event->SetExtraLong(offset);
+	event->SetClientData(h);
+	wxGetApp().QueueEvent(event);
+}
+
+void MyApp::OnNotifyRemove(HZQDB h)
+{
+	auto event = new wxCommandEvent(ZQDB_NOTIFY_REMOVE_EVENT);
+	//event->SetString(table);
+	//event->SetInt(type);
+	//event->SetExtraLong(offset);
+	event->SetClientData(h);
+	wxGetApp().QueueEvent(event);
+}
+
+void MyApp::OnNotifyUpdate(HZQDB h)
+{
+	auto event = new wxCommandEvent(ZQDB_NOTIFY_UPDATE_EVENT);
+	//event->SetString(table);
+	//event->SetInt(type);
+	//event->SetExtraLong(offset);
+	event->SetClientData(h);
+	wxGetApp().QueueEvent(event);
+}
+
 void MyApp::OnNotify(HMDB hdb, HMTABLE htb, MDB_NOTIFY_DATA* notify)
 {
-	//auto event = new wxCommandEvent(ZQDB_NOTIFY_EVENT);
+	/*//auto event = new wxCommandEvent(ZQDB_NOTIFY_EVENT);
 	//event->SetString(MDBTableGetName(hdb, htb)); //table
 	//event->SetInt(notify->notify); //type
 	//event->SetExtraLong(pos); //pos
@@ -574,5 +635,6 @@ void MyApp::OnNotify(HMDB hdb, HMTABLE htb, MDB_NOTIFY_DATA* notify)
 		event->SetClientData(h);
 		wxGetApp().QueueEvent(event);
 		offset++;
-	}
+	}*/
+	NotifyBase::OnNotify(hdb, htb, notify);
 }

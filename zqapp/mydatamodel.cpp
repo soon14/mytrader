@@ -601,7 +601,41 @@ bool MyCodeListModel::SetValueByRow(const wxVariant &variant,
 MyHZQDBListModel::MyHZQDBListModel(const char* xml, size_t xmlflag) :
 	wxDataViewVirtualListModel()
 {
+	wxCSConv utf8cv(wxFONTENCODING_UTF8);
 
+	CFG_FROM_XML(cfg, xml, xmlflag);
+	auto opt_col = cfg.get_child_optional("col"); 
+	ASSERT(opt_col);
+	auto& cfg_col = opt_col.get();
+	BOOST_FOREACH(const boost::property_tree::ptree::value_type &module_pr, cfg_col)
+	{
+		auto& col_items = all_col_items_[module_pr.first];
+		BOOST_FOREACH(const boost::property_tree::ptree::value_type &col_pr, module_pr.second)
+		{
+			auto& col_one = col_pr.second;
+			ColInfo col_item;
+			strncpy(col_item.field.name, col_one.get<std::string>("id", "").c_str(), MAX_FIELD_NAME);
+			col_item.name = utf8cv.cMB2WX(col_one.get<std::string>("name", "").c_str());
+			col_item.precision = col_one.get<int>("precision", 0);
+			col_items.emplace_back(col_item);
+		}
+	}
+}
+
+void MyHZQDBListModel::Select(HZQDB user)
+{ 
+	zqdb::ObjectT<tagModuleInfo> module(ZQDBGetParent(user));
+	col_items_ = all_col_items_[module->Name];
+	for (auto& item : col_items_)
+	{
+		module.NormalizeField(item.field, ZQDB_HANDLE_TYPE_ORDER);
+	}
+}
+
+void MyHZQDBListModel::Clear()
+{
+	val_items_.clear();
+	Reset(0);
 }
 
 void MyHZQDBListModel::Show(const std::vector<HZQDB>& h_list)

@@ -31,10 +31,12 @@
 class MyFrame : public wxFrame
 	, public zqdb::SkinMap<MyFrame, SkinInfo>
 	, public zqdb::TechContainerMap<MyFrame, zqdb::TechContainerInfo>
+	, public zqdb::HandleMap<MyFrame>
 {
 	typedef wxFrame Base;
 	typedef zqdb::SkinMap<MyFrame, SkinInfo> SkinBase;
 	typedef zqdb::TechContainerMap<MyFrame, zqdb::TechContainerInfo> ContainerMap;
+	typedef zqdb::HandleMap<MyFrame> UserBase;
 protected:
 	wxRibbonBar* m_ribbon;
 	//wxTextCtrl* m_logwindow;
@@ -52,6 +54,7 @@ protected:
 	MyCodeListNameRenderer* code_list_name_render_ = nullptr;
 	wxObjectDataPtr<MyCodeListModel> code_list_model_;
 	zqdb::TechView *m_tv;
+	wxString user_; //USER.BROKER
 	wxDataViewCtrl* position_list_ = nullptr;
 	wxDataViewCtrl* order_list_ = nullptr;
 	wxDataViewCtrl* trade_list_ = nullptr;
@@ -141,6 +144,7 @@ public:
 	void OnSkinInfoChanged();
 	void OnInfoChanged();
 	void OnCurItemChanged();
+	void OnHandleChanged();
 
 	void Back();
 	void Forward();
@@ -152,6 +156,13 @@ public:
 protected:
 	//
 	void OnGoto(wxCommandEvent& event);
+
+	void ShowView(wxWindow* page);
+	void DoViewNotifyEnable(HZQDB h);
+	void DoViewNotifyDisable(HZQDB h);
+	void DoViewNotifyAppend(HZQDB h);
+	void DoViewNotifyRemove(HZQDB h);
+	void DoViewNotifyUpdate(HZQDB h);
 
 	void Activate(const wxDataViewItem& item);
 	void OnActivated(wxDataViewEvent &event);

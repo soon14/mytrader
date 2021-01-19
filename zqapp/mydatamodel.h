@@ -196,14 +196,18 @@ public:
 		MDB_FIELD field;
 		int precision;
 		wxString name;
+		ColInfo() :field{ 0 }, precision(0), name(){}
 	};
 private:
+	std::map<std::string,std::vector<ColInfo>> all_col_items_;
 	std::vector<ColInfo> col_items_;
 	std::vector<HZQDB> val_items_;
 public:
 	MyHZQDBListModel(const char* xml = nullptr, size_t xmlflag = XUtil::XML_FLAG_JSON_STRING);
 
-	std::vector<ColInfo>& GetColInfo() { return col_items_; }
+	void Select(HZQDB user);
+	const std::vector<ColInfo>& GetColInfo() { return col_items_; }
+	void Clear();
 	void Show(const std::vector<HZQDB>& h_list);
 	HZQDB GetData(const wxDataViewItem& item);
 

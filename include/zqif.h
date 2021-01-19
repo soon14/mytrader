@@ -47,6 +47,10 @@ ZQDB_API_EXPORT MDB_STATUS ZQDBStop();
 #if defined(__cplusplus)
 }
 
+namespace zqdb {
+
+}
+
 #endif//
 
 #endif//_H_ZQDB_IF_H_

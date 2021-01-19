@@ -73,6 +73,13 @@ MyFrame::MyFrame(const char* xml, size_t xmlflag)
 
 	wxCSConv utf8cv(wxFONTENCODING_UTF8);
 
+	zqdb::AllUser alluser;
+	for (size_t i = 0; i < alluser.size(); i++)
+	{
+		h_ = alluser[0];
+		break;
+	}
+
 #if wxUSE_STATUSBAR
 	const int widths[] = { -1, 60, 60, 60, 60 };
 	CreateStatusBar(5);
@@ -467,6 +474,8 @@ MyFrame::MyFrame(const char* xml, size_t xmlflag)
 	m_bookCtrl = nullptr;
 	RecreateBook();
 
+	ShowView(order_list_);
+
 	wxSizer *s = new wxBoxSizer(wxVERTICAL);
 
 	s->Add(m_ribbon, 0, wxEXPAND);
@@ -490,7 +499,11 @@ MyFrame::MyFrame(const char* xml, size_t xmlflag)
 	Bind(wxEVT_DATAVIEW_ITEM_ACTIVATED, &MyFrame::OnActivated, this);
 	//Bind(ZQDB_CODE_PREV_EVENT, &MyFrame::OnCodePrev, this);
 	//Bind(ZQDB_CODE_NEXT_EVENT, &MyFrame::OnCodeNext, this);
-	Bind(ZQDB_NOTIFY_EVENT, &MyFrame::OnNotify, this);
+	Bind(ZQDB_NOTIFY_ENABLE_EVENT, &MyFrame::OnNotify, this);
+	Bind(ZQDB_NOTIFY_DISABLE_EVENT, &MyFrame::OnNotify, this);
+	Bind(ZQDB_NOTIFY_APPEND_EVENT, &MyFrame::OnNotify, this);
+	Bind(ZQDB_NOTIFY_REMOVE_EVENT, &MyFrame::OnNotify, this);
+	Bind(ZQDB_NOTIFY_UPDATE_EVENT, &MyFrame::OnNotify, this);
 
 	// test that event handlers pushed on top of MDI children do work (this
 	// used to be broken, see #11225)
@@ -683,11 +696,17 @@ void MyFrame::RecreateBook()
 			wxTE_MULTILINE | wxTE_READONLY), wxT("持仓"), false);
 
 		order_list_ = new wxDataViewCtrl(m_bookCtrl, wxID_ANY);
-		order_list_model_ = new MyHZQDBListModel();
+		order_list_model_ = new MyHZQDBListModel("./zqapp/orderlist.json", XUtil::XML_FLAG_JSON_FILE);
 		order_list_->AssociateModel(order_list_model_.get());
-		//order_list_->AppendTextColumn("Code",
-		//	SmartKBListModel::Col_Code);
-		//code_list_model_->Show();
+		if (h_) {
+			order_list_model_->Select(h_);
+			auto& order_col_info = order_list_model_->GetColInfo();
+			for (size_t i = 0, j = order_col_info.size(); i < j; i++)
+			{
+				auto& col_info = order_col_info[i];
+				order_list_->AppendTextColumn(col_info.name, i);
+			}
+		}
 		m_bookCtrl->AddPage(order_list_, wxT("委托"), true);
 		//m_bookCtrl->AddPage(new wxTextCtrl(m_bookCtrl, wxID_ANY, wxEmptyString,
 		//	wxDefaultPosition, wxDefaultSize,
@@ -920,6 +939,11 @@ void MyFrame::OnCurItemChanged()
 	Thaw();
 }
 
+void MyFrame::OnHandleChanged()
+{
+
+}
+
 void MyFrame::Back()
 {
 	if (record_pos_ > 0 && !record_list_.empty()) {
@@ -1024,6 +1048,70 @@ void MyFrame::OnGoto(wxCommandEvent& event)
 	techfrm->SetInfo(info_ptr);
 }
 
+void MyFrame::ShowView(wxWindow* page)
+{
+	//切换显示视图
+	auto old_page = m_bookCtrl->GetCurrentPage();
+	if (old_page != page) {
+		for (size_t i = 0, j = m_bookCtrl->GetPageCount(); i < j; i++)
+		{
+			if (m_bookCtrl->GetPage(i) == page)
+			{
+				m_bookCtrl->SetSelection(i);
+				break;
+			}
+		}
+	}
+	//初始化数据
+	if (page == order_list_) {
+		zqdb::AllOrder orders(h_);
+		order_list_model_->Show(orders);
+	}
+}
+
+void MyFrame::DoViewNotifyEnable(HZQDB h)
+{
+	auto tv = (zqdb::TechView*)m_tv; 
+	tv->OnNotifyEnable(h);
+	auto book_page = m_bookCtrl->GetCurrentPage();
+	if (book_page == order_list_ && ZQDBGetParent(h_) == h) {
+		zqdb::AllOrder orders(h_);
+		order_list_model_->Show(orders);
+	}
+}
+
+void MyFrame::DoViewNotifyDisable(HZQDB h)
+{
+	auto tv = (zqdb::TechView*)m_tv;
+	tv->OnNotifyDisable(h);
+	auto book_page = m_bookCtrl->GetCurrentPage();
+	if (book_page == order_list_ && ZQDBGetParent(h_) == h) {
+		order_list_model_->Clear();
+	}
+}
+
+void MyFrame::DoViewNotifyAppend(HZQDB h)
+{
+	auto tv = (zqdb::TechView*)m_tv;
+	tv->OnNotifyAppend(h);
+}
+
+void MyFrame::DoViewNotifyRemove(HZQDB h)
+{
+	auto tv = (zqdb::TechView*)m_tv;
+	tv->OnNotifyRemove(h);
+}
+
+void MyFrame::DoViewNotifyUpdate(HZQDB h)
+{
+	auto tv = (zqdb::TechView*)m_tv;
+	tv->OnNotifyUpdate(h);
+	auto book_page = m_bookCtrl->GetCurrentPage();
+	if (book_page == order_list_ && h->type == ZQDB_HANDLE_TYPE_ORDER) {
+		order_list_->Refresh();
+	}
+}
+
 void MyFrame::Activate(const wxDataViewItem& item)
 {
 	if (item) {
@@ -1041,8 +1129,27 @@ void MyFrame::OnNotify(wxCommandEvent& event)
 {
 	HZQDB h = (HZQDB)event.GetClientData();
 	if (h) {
-		auto tv = (zqdb::TechView*)m_tv;
-		tv->OnNotify(event.GetString(), event.GetInt(), event.GetExtraLong(), h);
+		if (event.GetEventType() == ZQDB_NOTIFY_ENABLE_EVENT)
+		{
+			DoViewNotifyEnable(h);
+		}
+		else if (event.GetEventType() == ZQDB_NOTIFY_DISABLE_EVENT)
+		{
+			DoViewNotifyDisable(h);
+		}
+		else if (event.GetEventType() == ZQDB_NOTIFY_APPEND_EVENT)
+		{
+			DoViewNotifyAppend(h);
+		}
+		else if (event.GetEventType() == ZQDB_NOTIFY_REMOVE_EVENT)
+		{
+			DoViewNotifyRemove(h);
+		}
+		else if (event.GetEventType() == ZQDB_NOTIFY_UPDATE_EVENT)
+		{
+			DoViewNotifyUpdate(h);
+		}
+		//tv->OnNotify(event.GetString(), event.GetInt(), event.GetExtraLong(), h);
 		/*auto calc_data_ptr = tv->GetCalcData();
 		if (calc_data_ptr && calc_data_ptr->GetBase() == code) {
 			tv->UpdateCalcData();
