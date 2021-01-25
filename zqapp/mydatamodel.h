@@ -205,7 +205,7 @@ private:
 public:
 	MyHZQDBListModel(const char* xml = nullptr, size_t xmlflag = XUtil::XML_FLAG_JSON_STRING);
 
-	void Select(HZQDB user);
+	void Select(HZQDB user, ZQDB_HANDLE_TYPE type);
 	const std::vector<ColInfo>& GetColInfo() { return col_items_; }
 	void Clear();
 	void Show(const std::vector<HZQDB>& h_list);

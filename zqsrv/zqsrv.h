@@ -1,6 +1,6 @@
 #pragma once
 
-#include <zqif.h>
+#include <zqdbif.h>
 
 #ifndef LOG4E
 #define LOG4E(format,...) printf("%s " format "\n", __FUNCTION__, ##__VA_ARGS__)

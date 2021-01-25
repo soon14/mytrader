@@ -691,15 +691,25 @@ void MyFrame::RecreateBook()
 			wxDefaultPosition, wxDefaultSize,
 			wxTE_MULTILINE | wxTE_READONLY), wxT("日志"), false);
 
-		m_bookCtrl->AddPage(new wxTextCtrl(m_bookCtrl, wxID_ANY, wxEmptyString,
-			wxDefaultPosition, wxDefaultSize,
-			wxTE_MULTILINE | wxTE_READONLY), wxT("持仓"), false);
+		position_list_ = new wxDataViewCtrl(m_bookCtrl, wxID_ANY);
+		position_list_model_ = new MyHZQDBListModel("./zqapp/positionlist.json", XUtil::XML_FLAG_JSON_FILE);
+		position_list_->AssociateModel(position_list_model_.get());
+		if (h_) {
+			position_list_model_->Select(h_, ZQDB_HANDLE_TYPE_POSITION);
+			auto& position_col_info = position_list_model_->GetColInfo();
+			for (size_t i = 0, j = position_col_info.size(); i < j; i++)
+			{
+				auto& col_info = position_col_info[i];
+				position_list_->AppendTextColumn(col_info.name, i);
+			}
+		}
+		m_bookCtrl->AddPage(position_list_, wxT("持仓"), false);
 
 		order_list_ = new wxDataViewCtrl(m_bookCtrl, wxID_ANY);
 		order_list_model_ = new MyHZQDBListModel("./zqapp/orderlist.json", XUtil::XML_FLAG_JSON_FILE);
 		order_list_->AssociateModel(order_list_model_.get());
 		if (h_) {
-			order_list_model_->Select(h_);
+			order_list_model_->Select(h_, ZQDB_HANDLE_TYPE_ORDER);
 			auto& order_col_info = order_list_model_->GetColInfo();
 			for (size_t i = 0, j = order_col_info.size(); i < j; i++)
 			{
@@ -712,9 +722,19 @@ void MyFrame::RecreateBook()
 		//	wxDefaultPosition, wxDefaultSize,
 		//	wxTE_MULTILINE | wxTE_READONLY), wxT("委托"), false);
 
-		m_bookCtrl->AddPage(new wxTextCtrl(m_bookCtrl, wxID_ANY, wxEmptyString,
-			wxDefaultPosition, wxDefaultSize,
-			wxTE_MULTILINE | wxTE_READONLY), wxT("成交"), false);
+		trade_list_ = new wxDataViewCtrl(m_bookCtrl, wxID_ANY);
+		trade_list_model_ = new MyHZQDBListModel("./zqapp/tradelist.json", XUtil::XML_FLAG_JSON_FILE);
+		trade_list_->AssociateModel(trade_list_model_.get());
+		if (h_) {
+			trade_list_model_->Select(h_, ZQDB_HANDLE_TYPE_TRADE);
+			auto& trade_col_info = trade_list_model_->GetColInfo();
+			for (size_t i = 0, j = trade_col_info.size(); i < j; i++)
+			{
+				auto& col_info = trade_col_info[i];
+				trade_list_->AppendTextColumn(col_info.name, i);
+			}
+		}
+		m_bookCtrl->AddPage(trade_list_, wxT("成交"), false);
 	}
 
 	m_bookCtrl->Show();

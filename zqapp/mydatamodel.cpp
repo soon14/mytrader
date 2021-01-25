@@ -622,13 +622,13 @@ MyHZQDBListModel::MyHZQDBListModel(const char* xml, size_t xmlflag) :
 	}
 }
 
-void MyHZQDBListModel::Select(HZQDB user)
+void MyHZQDBListModel::Select(HZQDB user, ZQDB_HANDLE_TYPE type)
 { 
 	zqdb::ObjectT<tagModuleInfo> module(ZQDBGetParent(user));
 	col_items_ = all_col_items_[module->Name];
 	for (auto& item : col_items_)
 	{
-		module.NormalizeField(item.field, ZQDB_HANDLE_TYPE_ORDER);
+		module.NormalizeField(item.field, type);
 	}
 }
 

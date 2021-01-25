@@ -111,7 +111,7 @@ IF(WIN32)
 	)
 	LINK_DIRECTORIES(../../../local/x64-windows-static/lib ${CMAKE_SOURCE_DIR}/bin/${CMAKE_SYSTEM_NAME}/${PLATFORM}
 	)
-	SET (EXTRA_LIBS ${EXTRA_LIBS} mdb zq
+	SET (EXTRA_LIBS ${EXTRA_LIBS} net mdbase zqdb
 	#mysqlcppconn 
 	#jwtd libeay32 ssleay32
 	)
@@ -120,7 +120,7 @@ ELSE()
 	)
 	LINK_DIRECTORIES(../../local/lib64 ../../local/lib ${CMAKE_SOURCE_DIR}/bin/${CMAKE_SYSTEM_NAME}/${PLATFORM}
 	)
-	SET (EXTRA_LIBS ${EXTRA_LIBS} mdb zq
+	SET (EXTRA_LIBS ${EXTRA_LIBS} net mdbase zqdb
 	#mysqlcppconn jwt 
 	#crypto ssl 
 	pthread dl
