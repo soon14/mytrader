@@ -474,7 +474,7 @@ MyFrame::MyFrame(const char* xml, size_t xmlflag)
 	m_bookCtrl = nullptr;
 	RecreateBook();
 
-	ShowView(order_list_);
+	ShowView(position_list_);
 
 	wxSizer *s = new wxBoxSizer(wxVERTICAL);
 
@@ -1083,9 +1083,17 @@ void MyFrame::ShowView(wxWindow* page)
 		}
 	}
 	//初始化数据
-	if (page == order_list_) {
+	if (page == position_list_) {
+		zqdb::AllPosition positions(h_);
+		position_list_model_->Show(positions);
+	}
+	else if (page == order_list_) {
 		zqdb::AllOrder orders(h_);
 		order_list_model_->Show(orders);
+	}
+	else if (page == trade_list_) {
+		zqdb::AllTrade trades(h_);
+		trade_list_model_->Show(trades);
 	}
 }
 
