@@ -3,7 +3,7 @@
 #ifndef _H_ZQDB_CALC_H_
 #define _H_ZQDB_CALC_H_
 
-#include <zq.h>
+#include <zqdb.h>
 
 #if defined(LIB_CALC_API) && defined(WIN32)
 #ifdef LIB_CALC_API_EXPORT
@@ -276,6 +276,8 @@ typedef struct tagCalcData
 	HZQDB h;
 	PERIODTYPE cycle;
 	size_t cycleex;
+	int begin_date;
+	int end_date;
 }CALCDATA, *PCALCDATA;
 
 typedef struct tagCalcResult
@@ -374,7 +376,8 @@ CALC_API_EXPORT size_t ZQDBGetAllCalcFuncCount(size_t type);
 CALC_API_EXPORT size_t ZQDBGetAllCalcFunc(size_t type, HZQDB* h, size_t count);
 
 CALC_API_EXPORT MDB_STATUS ZQDBCloseCalcData(HZQDB data);
-CALC_API_EXPORT HZQDB ZQDBOpenCalcData(HZQDB code, PERIODTYPE cycle, size_t cycleex);
+//begin_date开始日期YYYYMMDD，0表示从头开始，-1表示当前交易日开始，end_date结束日期YYYYMMDD，-1表示到当前交易日
+CALC_API_EXPORT HZQDB ZQDBOpenCalcData(HZQDB code, PERIODTYPE cycle, size_t cycleex, int begin_date, int end_date);
 
 CALC_API_EXPORT MDB_STATUS ZQDBCloseCalculator(HZQDB calc);
 CALC_API_EXPORT HZQDB ZQDBOpenCalculator(const char* name, HZQDB data, HZQDB input);
@@ -570,8 +573,8 @@ protected:
 	bool auto_close_ = true;
 public:
 	Data() {}
-	Data(const char* code, PERIODTYPE cycle, size_t cycleex = 0) :h_(ZQDBOpenCalcData(ZQDBGetCode(code), cycle, cycleex)) {}
-	Data(HZQDB code, PERIODTYPE cycle, size_t cycleex = 0):h_(ZQDBOpenCalcData(code, cycle, cycleex)) {}
+	Data(const char* code, PERIODTYPE cycle, size_t cycleex = 0, int begin_date = -1, int end_date = -1) :h_(ZQDBOpenCalcData(ZQDBGetCode(code), cycle, cycleex, begin_date, end_date)) {}
+	Data(HZQDB code, PERIODTYPE cycle, size_t cycleex = 0, int begin_date = -1, int end_date = -1):h_(ZQDBOpenCalcData(code, cycle, cycleex, begin_date, end_date)) {}
 	Data(HZQDB h, bool auto_close = false):h_(h), auto_close_(auto_close) {}
 	~Data()
 	{
@@ -586,7 +589,7 @@ public:
 			}
 		}
 	}
-	inline HZQDB Open(HZQDB code, PERIODTYPE cycle, size_t cycleex = 0) { h_ = ZQDBOpenCalcData(code, cycle, cycleex);  auto_close_ = true; return h_; }
+	inline HZQDB Open(HZQDB code, PERIODTYPE cycle, size_t cycleex = 0, int begin_date = -1, int end_date = -1) { h_ = ZQDBOpenCalcData(code, cycle, cycleex, begin_date, end_date);  auto_close_ = true; return h_; }
 	inline HZQDB Open(HZQDB h, bool auto_close = false) { h_ = h; auto_close_ = auto_close; return h_; }
 	inline bool IsOpen() { return h_ != nullptr; }
 	inline operator HZQDB() const { return h_; }

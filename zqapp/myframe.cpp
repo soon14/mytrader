@@ -925,7 +925,7 @@ void MyFrame::OnCurItemChanged()
 	auto tv = (zqdb::TechView*)m_tv;
 	auto pos = GetCurItemPos();
 	auto h = GetItem(pos);
-	auto data = std::make_shared<zqdb::Calc::Data>(h, CYC_1MIN);
+	auto data = std::make_shared<zqdb::Calc::Data>(h, CYC_1MIN, 0, 0);
 	tagCodeInfo* code = (tagCodeInfo*)data->GetValue();
 	wxCSConv utf8cv(wxFONTENCODING_UTF8);
 	wxString title = wxString::Format(wxT("%s %s")

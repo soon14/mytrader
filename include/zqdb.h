@@ -598,7 +598,7 @@ typedef struct tagCodeInfo
 	 char Broker[MAX_NAME_LENGTH + 1]; //经纪公司代码
 	 char Investor[MAX_NAME_LENGTH + 1]; //投资者代码
 	 char User[MAX_NAME_LENGTH + 1]; //用户代码
-	 char Exchange[MAX_NAME_LENGTH + 1]; //市场
+	 char Exchange[MAX_EXCHANGE_LENGTH + 1]; //市场
 	 char Code[MAX_CODE_LENGTH + 1]; //代码
 	 char Currency; //币种 CURRENCY_CNY
 	 double Price; //价格
@@ -613,7 +613,7 @@ typedef struct tagCodeInfo
 	 char Investor[MAX_NAME_LENGTH + 1]; //投资者代码
 	 char User[MAX_NAME_LENGTH + 1]; //用户代码
 	 char Order[MAX_NAME_LENGTH + 1]; //订单ID
-	 char Exchange[MAX_NAME_LENGTH + 1]; //市场
+	 char Exchange[MAX_EXCHANGE_LENGTH + 1]; //市场
 	 char Code[MAX_CODE_LENGTH + 1]; //代码
 	 char Currency; //币种 CURRENCY_CNY
 	 double Price; //价格
@@ -632,7 +632,7 @@ typedef struct tagCodeInfo
 	 char Investor[MAX_NAME_LENGTH + 1]; //投资者代码
 	 char User[MAX_NAME_LENGTH + 1]; //用户代码
 	 char Trade[MAX_NAME_LENGTH + 1]; //成交ID
-	 char Exchange[MAX_NAME_LENGTH + 1]; //市场
+	 char Exchange[MAX_EXCHANGE_LENGTH + 1]; //市场
 	 char Code[MAX_CODE_LENGTH + 1]; //代码
 	 char Currency; //币种 CURRENCY_CNY	
 	 double Price; //价格
@@ -780,19 +780,31 @@ ZQDB_API_EXPORT void ZQDBAddTickData(HZQDB h, MDB_FIELD* field, size_t field_num
 ZQDB_API_EXPORT void ZQDBAddKData(HZQDB h, PERIODTYPE cycle, MDB_FIELD* field, size_t field_num, const KDATA* data, size_t max_count);
 ZQDB_API_EXPORT void ZQDBUpdateKData(HZQDB h, PERIODTYPE cycle, MDB_FIELD* field, size_t field_num, const KDATA* data);
 
-ZQDB_API_EXPORT size_t ZQDBGetTickMaxCount(HZQDB h);
-ZQDB_API_EXPORT size_t ZQDBGetTickCount(HZQDB h, size_t* elem_sz);
-ZQDB_API_EXPORT MDB_STATUS ZQDBGetTickValue(HZQDB h, MDB_FIELD* field, size_t field_num, size_t pos, size_t num, void* data);
-ZQDB_API_EXPORT size_t ZQDBGetKDataMaxCount(HZQDB h, PERIODTYPE cycle, size_t cycleex);
-ZQDB_API_EXPORT size_t ZQDBGetKDataCount(HZQDB h, PERIODTYPE cycle, size_t cycleex, size_t* elem_sz);
-ZQDB_API_EXPORT MDB_FIELD* ZQDBGetKDataAttr(HZQDB h, PERIODTYPE cycle, size_t cycleex, size_t* attr_num);
-ZQDB_API_EXPORT MDB_STATUS ZQDBGetKDataValue(HZQDB h, PERIODTYPE cycle, size_t cycleex, MDB_FIELD* field, size_t field_num, size_t pos, size_t num, void* data);
+ZQDB_API_EXPORT size_t ZQDBGetDataAttrCount(HZQDB h, PERIODTYPE cycle, size_t cycleex);
+ZQDB_API_EXPORT MDB_STATUS ZQDBGetDataAttr(HZQDB h, PERIODTYPE cycle, size_t cycleex, size_t attr_num, MDB_FIELD* attr);
+
+ZQDB_API_EXPORT size_t ZQDBGetDataMaxCount(HZQDB h, PERIODTYPE cycle, size_t cycleex);
+ZQDB_API_EXPORT size_t ZQDBGetDataCount(HZQDB h, PERIODTYPE cycle, size_t cycleex, size_t* elem_sz);
+ZQDB_API_EXPORT MDB_STATUS ZQDBGetDataValue(HZQDB h, PERIODTYPE cycle, size_t cycleex, size_t pos, size_t* num, void* data);
+
+ZQDB_API_EXPORT size_t ZQDBGetHisDataMaxCount(HZQDB h, PERIODTYPE cycle, size_t cycleex);
+ZQDB_API_EXPORT size_t ZQDBGetHisDataCount(HZQDB h, PERIODTYPE cycle, size_t cycleex, size_t* elem_sz);
+ZQDB_API_EXPORT MDB_STATUS ZQDBGetHisDataValue(HZQDB h, PERIODTYPE cycle, size_t cycleex, size_t pos, size_t* num, void* data);
 
 //ZQDB_API_EXPORT void ZQDBGetAccount(HZQDB h, MDB_FIELD* field, size_t field_num, const char* data);
 //ZQDB_API_EXPORT void ZQDBGetOrder(HZQDB h, MDB_FIELD* field, size_t field_num, const char* data, size_t max_count);
 //ZQDB_API_EXPORT void ZQDBGetTrade(HZQDB h, MDB_FIELD* field, size_t field_num, const char* data, size_t max_count);
 //ZQDB_API_EXPORT void ZQDBGetPosition(HZQDB h, MDB_FIELD* field, size_t field_num, const char* data, size_t max_count);
 //
+
+ZQDB_API_EXPORT bool ZQDBIsSrv();
+static inline bool ZQDBIsApi() { return !ZQDBIsSrv(); }
+ZQDB_API_EXPORT bool ZQDBIsRpc();
+static inline bool ZQDBIsIpc() { return !ZQDBIsRpc(); }
+
+ZQDB_API_EXPORT size_t ZQDBReqID(size_t type);
+ZQDB_API_EXPORT size_t ZQDBReqType(size_t id);
+
 ZQDB_API_EXPORT MDB_STATUS ZQDBReqLogin(HZQDB h, NET_MSG* msg, NET_MSG** rsp, size_t timeout);
 ZQDB_API_EXPORT MDB_STATUS ZQDBReqLogout(HZQDB h, NET_MSG* msg, NET_MSG** rsp, size_t timeout);
 ZQDB_API_EXPORT MDB_STATUS ZQDBReqNewOrder(HZQDB h, NET_MSG* msg, NET_MSG** rsp, size_t timeout);
@@ -1109,13 +1121,24 @@ namespace zqdb {
 		void AddKData(PERIODTYPE cycle, MDB_FIELD* field, size_t field_num, const KDATA* data, size_t max_count) { ZQDBAddKData(h_, cycle, field, field_num, data, max_count); }
 		void UpdateKData(PERIODTYPE cycle, MDB_FIELD* field, size_t field_num, const KDATA* data) { ZQDBUpdateKData(h_, cycle, field, field_num, data); }
 
-		size_t GetTickMaxCount() { return ZQDBGetTickMaxCount(h_); }
-		size_t GetTickCount(size_t* elem_sz = nullptr) { return ZQDBGetTickCount(h_, elem_sz); }
-		MDB_STATUS GetTickValue(MDB_FIELD* field, size_t field_num, size_t pos, size_t num, void* data) { return ZQDBGetTickValue(h_, field, field_num, pos, num, data); }
+		size_t GetDataMaxCount(PERIODTYPE cycle, size_t cycleex) { return ZQDBGetDataMaxCount(h_, cycle, cycleex); }
+		size_t GetDataCount(PERIODTYPE cycle, size_t cycleex, size_t* elem_sz = nullptr) { return ZQDBGetDataCount(h_, cycle, cycleex, elem_sz); }
+		MDB_STATUS GetDataValue(PERIODTYPE cycle, size_t cycleex, size_t pos, size_t* num, void* data) { return ZQDBGetDataValue(h_, cycle, cycleex, pos, num, data); }
 		
-		size_t GetKDataMaxCount(PERIODTYPE cycle, size_t cycleex) { return ZQDBGetKDataMaxCount(h_, cycle, cycleex); }
-		size_t GetKDataCount(PERIODTYPE cycle, size_t cycleex, size_t* elem_sz = nullptr) { return ZQDBGetKDataCount(h_, cycle, cycleex, elem_sz); }
-		MDB_STATUS GetKDataValue(PERIODTYPE cycle, size_t cycleex, MDB_FIELD* field, size_t field_num, size_t pos, size_t num, void* data) { return ZQDBGetKDataValue(h_, cycle, cycleex, field, field_num, pos, num, data); }
+		size_t GetHisDataMaxCount(PERIODTYPE cycle, size_t cycleex) { return ZQDBGetHisDataMaxCount(h_, cycle, cycleex); }
+		size_t GetHisDataCount(PERIODTYPE cycle, size_t cycleex, size_t* elem_sz = nullptr) { return ZQDBGetHisDataCount(h_, cycle, cycleex, elem_sz); }
+		MDB_STATUS GetHisDataValue(PERIODTYPE cycle, size_t cycleex, size_t pos, size_t* num, void* data) { return ZQDBGetHisDataValue(h_, cycle, cycleex, pos, num, data); }
+	};
+
+	class Msg : public net::Msg
+	{
+		typedef net::Msg Base;
+	public:	
+		using Base::Base;
+
+		inline NET_STATUS SetReqID(size_t req_type) { return SetID(ZQDBReqID(req_type)); }
+		inline size_t GetReqID() { return GetID(); }
+		inline size_t GetReqType() const { return ZQDBReqType(GetID()); }
 	};
 
 	template<class T>
