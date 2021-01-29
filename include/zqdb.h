@@ -791,6 +791,12 @@ ZQDB_API_EXPORT size_t ZQDBGetHisDataMaxCount(HZQDB h, PERIODTYPE cycle, size_t 
 ZQDB_API_EXPORT size_t ZQDBGetHisDataCount(HZQDB h, PERIODTYPE cycle, size_t cycleex, size_t* elem_sz);
 ZQDB_API_EXPORT MDB_STATUS ZQDBGetHisDataValue(HZQDB h, PERIODTYPE cycle, size_t cycleex, size_t pos, size_t* num, void* data);
 
+enum {
+	CLEAR_HIS_DATA = 0,
+	DELETE_HIS_DATA = 0x01,
+}; 
+ZQDB_API_EXPORT void ZQDBClearHisData(HZQDB h, PERIODTYPE cycle, size_t flags);
+
 //ZQDB_API_EXPORT void ZQDBGetAccount(HZQDB h, MDB_FIELD* field, size_t field_num, const char* data);
 //ZQDB_API_EXPORT void ZQDBGetOrder(HZQDB h, MDB_FIELD* field, size_t field_num, const char* data, size_t max_count);
 //ZQDB_API_EXPORT void ZQDBGetTrade(HZQDB h, MDB_FIELD* field, size_t field_num, const char* data, size_t max_count);
