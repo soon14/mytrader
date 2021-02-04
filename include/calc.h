@@ -268,7 +268,7 @@ typedef struct tagCalcPoint
 	double dvalue;			//y值
 	unsigned long date;		//x日期
 	unsigned long time;		//x时间
-							//char lable[32];
+	//char lable[32];
 }TCALCPOINT, *PCALCPOINT;
 
 typedef struct tagCalcData

@@ -692,7 +692,7 @@ void MyFrame::RecreateBook()
 			wxTE_MULTILINE | wxTE_READONLY), wxT("日志"), false);
 
 		position_list_ = new wxDataViewCtrl(m_bookCtrl, wxID_ANY);
-		position_list_model_ = new MyHZQDBListModel("./zqapp/positionlist.json", XUtil::XML_FLAG_JSON_FILE);
+		position_list_model_ = new MyHZQDBListModel("./mytrader/positionlist.json", XUtil::XML_FLAG_JSON_FILE);
 		position_list_->AssociateModel(position_list_model_.get());
 		if (h_) {
 			position_list_model_->Select(h_, ZQDB_HANDLE_TYPE_POSITION);
@@ -706,7 +706,7 @@ void MyFrame::RecreateBook()
 		m_bookCtrl->AddPage(position_list_, wxT("持仓"), false);
 
 		order_list_ = new wxDataViewCtrl(m_bookCtrl, wxID_ANY);
-		order_list_model_ = new MyHZQDBListModel("./zqapp/orderlist.json", XUtil::XML_FLAG_JSON_FILE);
+		order_list_model_ = new MyHZQDBListModel("./mytrader/orderlist.json", XUtil::XML_FLAG_JSON_FILE);
 		order_list_->AssociateModel(order_list_model_.get());
 		if (h_) {
 			order_list_model_->Select(h_, ZQDB_HANDLE_TYPE_ORDER);
@@ -723,7 +723,7 @@ void MyFrame::RecreateBook()
 		//	wxTE_MULTILINE | wxTE_READONLY), wxT("委托"), false);
 
 		trade_list_ = new wxDataViewCtrl(m_bookCtrl, wxID_ANY);
-		trade_list_model_ = new MyHZQDBListModel("./zqapp/tradelist.json", XUtil::XML_FLAG_JSON_FILE);
+		trade_list_model_ = new MyHZQDBListModel("./mytrader/tradelist.json", XUtil::XML_FLAG_JSON_FILE);
 		trade_list_->AssociateModel(trade_list_model_.get());
 		if (h_) {
 			trade_list_model_->Select(h_, ZQDB_HANDLE_TYPE_TRADE);

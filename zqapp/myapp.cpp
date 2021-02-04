@@ -32,7 +32,7 @@ wxBitmap *gs_bmpNoMask = NULL,
 
 void CB_LOG(int level, const char* logstr)
 {
-
+	printf("%s\n", logstr);
 }
 
 void CB_STATUS(HNNODE h, NET_NODE_STATUS status)
@@ -425,7 +425,7 @@ bool MyApp::OnInit()
 
 	auto path_module_dir = boost::dll::this_line_location().remove_leaf();
 	auto path_desc_file = path_module_dir;
-	path_desc_file.append("zqapp").append("desc.json");
+	path_desc_file.append("mytrader").append("desc.json");
 	auto desc_file = path_desc_file.string();
 	CFG_FROM_XML(cfg, desc_file.c_str(), XUtil::XML_FLAG_JSON_FILE);
 	ZQDB_INF zqdb_inf = { XUtil::XML_FLAG_PTREE, (const char*)&cfg, &CB_LOG, &CB_STATUS, &CB_MSG, &CB_NOTIFY };
@@ -433,6 +433,22 @@ bool MyApp::OnInit()
     //ZQDB_IN_API_TABLE in = { XUtil::XML_FLAG_JSON_STRING, R"({ "node":{ "name":"zqdbsrv", "type":"SRV" }, "ZQDB": { "name": "ZQDB.ctp.db", "max_mem_size": 1000000000 }, "upstream": { "host": "localhost", "port": 6660, "mode": "IPC" }, "downstream": { "host": "0.0.0.0", "port": 6666 } })" };
     //in.cb = &ZQDB_NOTIFY;
     //ZQDB_API_Init(&in, &g_api);
+	{
+		zqdb::Msg msg(NET_MSG_TYPE_REQUEST_DO);
+		msg.SetReqID(com::zq::proto::msg::MSG_ID_REQUEST_DO_TD_USER_LOGIN);
+		msg.SetParam("User", "113334");
+		com::zq::proto::msg::ReqLogin req;
+		req.set_broker("9999");
+		req.set_user("113334");
+		req.set_password("861116");
+		req.set_code("0000000000000000");
+		req.set_appid("simnow_client_test");
+		req.set_tdaddress("tcp://180.168.146.187:10100");
+		req.set_mdaddress("tcp://180.168.146.187:10110");
+		auto str = req.SerializeAsString();
+		msg.SetData(str.data(), str.size());
+		ZQDBReqLogin(ZQDBGetModule("ctp"), msg, nullptr, 0);
+	}
 
 	//第一次需要调用一下，这样才会创建计算模块
 	ZQDBUpdateCalc();

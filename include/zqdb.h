@@ -716,10 +716,21 @@ ZQDB_API_EXPORT size_t ZQDBGetAllProduct(HZQDB h, HZQDB* product, size_t count);
 ZQDB_API_EXPORT size_t ZQDBGetAllCodeCount(HZQDB h);
 ZQDB_API_EXPORT size_t ZQDBGetAllCode(HZQDB h, HZQDB* code, size_t count);
 
-ZQDB_API_EXPORT MDB_STATUS ZQDBBeginNewTradingDay(const char* exchange, uint32_t tradingday);
+//交易日切换清理标志
+enum {
+	CLEAR_MARKET_DATA = 0X0001,
+	SAVE_MARKET_DATA = 0X0002,
+	CLEAR_MARKET_HIS_DATA = 0X0010,
+	DELETE_MARKET_HIS_DATA = 0X0020,
+	CLEAR_TRADE_DATA = 0X0100,
+	SAVE_TRADE_DATA = 0X0200,
+	CLEAR_TRADE_HIS_DATA = 0X1000,
+	DELETE_TRADE_HIS_DATA = 0X2000,
+};
+ZQDB_API_EXPORT MDB_STATUS ZQDBBeginNewTradingDay(const char* exchange, uint32_t flags);
 //具体更新由对应模块自行实现，基本上是等待一下，先清理数据（Tick、M1、M5等历史数据），然后更新市场、产品、代码等快照数据
-ZQDB_API_EXPORT void ZQDBDoNewTradingDayClear(const char* exchange, uint32_t tradingday);
-ZQDB_API_EXPORT void ZQDBEndNewTradingDay(const char* exchange, uint32_t tradingday);
+ZQDB_API_EXPORT void ZQDBDoNewTradingDayClear(const char* exchange, uint32_t flags);
+ZQDB_API_EXPORT void ZQDBEndNewTradingDay(const char* exchange, uint32_t flags);
 
 ZQDB_API_EXPORT HZQDB ZQDBUpdateOrInitExchange(EXCHANGEINFO* exchange);
 ZQDB_API_EXPORT HZQDB ZQDBUpdateOrInitProduct(MDB_FIELD* field, size_t field_num, PRODUCTINFO* product, size_t max_count);
@@ -732,10 +743,10 @@ ZQDB_API_EXPORT HZQDB ZQDBGetCode(const char* code);
 ZQDB_API_EXPORT size_t ZQDBGetAllModuleCount();
 ZQDB_API_EXPORT size_t ZQDBGetAllModule(HZQDB* module, size_t count);
 
-ZQDB_API_EXPORT MDB_STATUS ZQDBBeginModuleNewTradingDay(HZQDB module, uint32_t tradingday);
+ZQDB_API_EXPORT MDB_STATUS ZQDBBeginModuleNewTradingDay(HZQDB module, uint32_t flags);
 //具体更新由对应模块自行实现，基本上是等待一下，先清理数据（委托、持仓、成交等数据），然后更新委托、持仓、成交等数据
-ZQDB_API_EXPORT void ZQDBDoModuleNewTradingDayClear(HZQDB module, uint32_t tradingday);
-ZQDB_API_EXPORT void ZQDBEndModuleNewTradingDay(HZQDB module, uint32_t tradingday);
+ZQDB_API_EXPORT void ZQDBDoModuleNewTradingDayClear(HZQDB module, uint32_t flags);
+ZQDB_API_EXPORT void ZQDBEndModuleNewTradingDay(HZQDB module, uint32_t flags);
 
 ZQDB_API_EXPORT HZQDB ZQDBUpdateOrInitModule(MODULEINFO* module);
 
@@ -803,14 +814,16 @@ ZQDB_API_EXPORT void ZQDBClearHisData(HZQDB h, PERIODTYPE cycle, size_t flags);
 //ZQDB_API_EXPORT void ZQDBGetPosition(HZQDB h, MDB_FIELD* field, size_t field_num, const char* data, size_t max_count);
 //
 
-ZQDB_API_EXPORT bool ZQDBIsSrv();
-static inline bool ZQDBIsApi() { return !ZQDBIsSrv(); }
-ZQDB_API_EXPORT bool ZQDBIsRpc();
-static inline bool ZQDBIsIpc() { return !ZQDBIsRpc(); }
+//ZQDB_API_EXPORT bool ZQDBIsSrv();
+//static inline bool ZQDBIsApi() { return !ZQDBIsSrv(); }
+ZQDB_API_EXPORT bool ZQDBIsIPC();
+ZQDB_API_EXPORT bool ZQDBIsRPC();
 
 ZQDB_API_EXPORT size_t ZQDBReqID(size_t type);
 ZQDB_API_EXPORT size_t ZQDBReqType(size_t id);
 
+ZQDB_API_EXPORT MDB_STATUS ZQDBSendMsg(NET_MSG* msg, NET_MSG** rsp, size_t timeout);
+ZQDB_API_EXPORT MDB_STATUS ZQDBRequest(HZQDB h, NET_MSG* msg, NET_MSG** rsp, size_t timeout);
 ZQDB_API_EXPORT MDB_STATUS ZQDBReqLogin(HZQDB h, NET_MSG* msg, NET_MSG** rsp, size_t timeout);
 ZQDB_API_EXPORT MDB_STATUS ZQDBReqLogout(HZQDB h, NET_MSG* msg, NET_MSG** rsp, size_t timeout);
 ZQDB_API_EXPORT MDB_STATUS ZQDBReqNewOrder(HZQDB h, NET_MSG* msg, NET_MSG** rsp, size_t timeout);
