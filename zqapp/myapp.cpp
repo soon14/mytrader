@@ -511,7 +511,7 @@ void MyApp::ResetFrame(MyFrame * frame)
 
 void MyApp::Goto(HZQDB h)
 {
-	auto techfrm = new MyFrame("./zqapp/techfrm.json", XUtil::XML_FLAG_JSON_FILE);
+	auto techfrm = new MyFrame("./mytrader/techfrm.json", XUtil::XML_FLAG_JSON_FILE);
 	techfrm->SetSkinInfo(skin_info_ptr_);
 
 	auto info_ptr = std::make_shared<zqdb::TechContainerInfo>(techfrm);

@@ -106,4 +106,5 @@ ADD_DEFINITIONS(-DUNICODE -D_UNICODE)
 ENDIF()
 
 add_subdirectory(zqsrv)
+add_subdirectory(view)
 add_subdirectory(zqapp)
