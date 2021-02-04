@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package com.net.proto.msg;
+
+//D:\vcpkg\installed\x64-windows-static\tools\protobuf\protoc.exe 
+//生成protobuf：(在*.proto所在目录)
+//C/C++:protoc -I=./ --cpp_out=./ ./msg.proto
+//OC:protoc --proto_path=./ --objc_out=./../oc ./msg.proto
+//JAVA:protoc --java_out=./../java ./msg.proto
+
+//消息
+enum MSG {
+	MSG_UNKNOWN = 0; //未知
+	MSG_NOTIFY = 1; //通知
+	MSG_REQUEST_DO = 2; //请求
+	MSG_REQUEST_QUERY = 3; //查询
+	MSG_RESPONSE = 4; //回应
+}
+
+message Variant {
+	oneof variant {
+		bool b = 1;
+		uint32 u32 = 2;
+		sint32 i32 = 3;
+		uint64 u64 = 4;
+		sint64 i64 = 5;
+		float f32 = 6;
+		double f64 = 7;
+		string str = 8;
+		bytes data = 9;
+	}
+}
+
+message VarMessage {
+	int32 type = 1; //消息类型
+	int32 id = 2; //消息ID
+	map<string, Variant> param = 3; // 参数param
+	bytes data = 4; //数据data，根据type和id对应具体pb类型data
+}
+
+message Message {
+	MSG type = 1; //消息类型
+	int32 id = 2; //消息ID
+	map<string, string> param = 3; // 参数param
+	bytes data = 4; //数据data，根据type和id对应具体pb类型data
+}
