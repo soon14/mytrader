@@ -876,8 +876,6 @@ namespace zqdb {
 		//typedef DispMap<TechView> DispBase;
 		typedef CalcDataMap<TechView> CalcDataBase;
 	protected:
-		SplitterSizer  *tech_sizer_ = nullptr;
-
 		//windicator
 		std::vector<Windicator*> objs_;
 		void Broadcast(const std::function<bool(size_t pos, Windicator* obj)>& f);
@@ -888,13 +886,6 @@ namespace zqdb {
 		wxPoint show_cross_cursor_; //是否显示当前位置（屏幕坐标）十字游标，(0, 0)表示不显示
 		std::shared_ptr<PointInfo> point_info_ptr_;	//坐标信息（位置，值）
 		std::shared_ptr<IndexInfo> index_info_ptr_;	//K线信息（值，坐标）
-
-		//topview or rightview
-		TitleView* title_view_ = nullptr;
-		MmpView* mmp_view_ = nullptr;
-		TradeView* trade_view_ = nullptr;
-		InfoView* info_view_ = nullptr;
-		TickView* tick_view_ = nullptr;
 
 		/*wxSizerItem* item_sizer_ = nullptr;
 		size_t item_sizer_index_ = 0;
@@ -955,7 +946,7 @@ namespace zqdb {
 
 		void SwapDispInfo();
 		enum { UD_NONE = 0, UD_BARSCHANGE, UD_SIZECHANGE, UD_DISPCHANGE, };
-		void UpdateDispInfo(int udType = UD_NONE);
+		void UpdateDispInfo(int udType = UD_NONE, int x = 0, int y = 0);
 
 		//wxSizerItem* GetItemByPoint(const wxPoint& pt, size_t* index = nullptr);
 

@@ -485,7 +485,90 @@ MyFrame::MyFrame(const char* xml, size_t xmlflag)
 	//sh->Add(m_logwindow, 0, wxEXPAND);
 	sh->Add(code_list_, 0, wxEXPAND);
 	sh->AddSpacer(1);
+
+	/*auto opt_topview = cfg.get_child_optional("topview");
+	if (opt_topview) {
+		auto& cfg_topview = opt_topview.get();
+		auto *sizer_topview = new wxBoxSizer(wxHORIZONTAL);
+		auto opt_tradeview = cfg_topview.get_child_optional("tradeview");
+		auto opt_infoview = cfg_topview.get_child_optional("infoview");
+		if (opt_tradeview) {
+			trade_view_ = new TradeView(this, (const char*)&opt_tradeview.get(), XUtil::XML_FLAG_PTREE);
+			sizer_topview->Add(trade_view_, 0, wxEXPAND);
+		}
+		if (opt_infoview) {
+			info_view_ = new InfoView(this, (const char*)&opt_infoview.get(), XUtil::XML_FLAG_PTREE);
+			sizer_topview->Add(info_view_, 1, wxEXPAND);
+		}
+		else {
+			info_view_ = new InfoView(this);
+			sizer_topview->Add(info_view_, 1, wxEXPAND);
+		}
+		tech_sizer_->Add(sizer_topview, 0, wxEXPAND);
+	}*/
+
 	sh->Add(m_tv, 1, wxEXPAND);
+
+	//ÓÒ²àÊÓÍ¼
+	/*sh->AddSplitter(1);
+	//sh->AddSpacer(200);
+	sh->Add(
+	new wxButton(this, wxID_CANCEL, "Cancel"),
+	1,
+	wxEXPAND);*/
+	auto opt_rightview = cfg.get_child_optional("rightview");
+	if (opt_rightview) {
+		bool add_spacer = false;
+		auto& cfg_rightview = opt_rightview.get();
+		auto *sizer_rightview = new wxBoxSizer(wxVERTICAL);
+		auto opt_titleview = cfg_rightview.get_child_optional("titleview");
+		auto opt_mmpview = cfg_rightview.get_child_optional("mmpview");
+		auto opt_tradeview = cfg_rightview.get_child_optional("tradeview");
+		auto opt_tickview = cfg_rightview.get_child_optional("tickview");
+		if (opt_titleview) {
+			if (add_spacer) {
+				sizer_rightview->AddSpacer(1);
+			}
+			add_spacer = true;
+			title_view_ = new zqdb::TitleView(this, (const char*)&opt_titleview.get(), XUtil::XML_FLAG_PTREE);
+			sizer_rightview->Add(title_view_, 0, wxEXPAND);
+		}
+		if (opt_mmpview) {
+			if (add_spacer) {
+				sizer_rightview->AddSpacer(1);
+			}
+			add_spacer = true;
+			mmp_view_ = new zqdb::MmpView(this, (const char*)&opt_mmpview.get(), XUtil::XML_FLAG_PTREE);
+			sizer_rightview->Add(mmp_view_, 0, wxEXPAND);
+		}
+		if (opt_tradeview) {
+			if (add_spacer) {
+				sizer_rightview->AddSpacer(1);
+			}
+			add_spacer = true;
+			trade_view_ = new zqdb::TradeView(this, (const char*)&opt_tradeview.get(), XUtil::XML_FLAG_PTREE);
+			sizer_rightview->Add(trade_view_, 0, wxEXPAND);
+		}
+		if (opt_tickview) {
+			if (add_spacer) {
+				sizer_rightview->AddSpacer(1);
+			}
+			add_spacer = true;
+			tick_view_ = new zqdb::TickView(this, (const char*)&opt_tickview.get(), XUtil::XML_FLAG_PTREE);
+			sizer_rightview->Add(tick_view_, 1, wxEXPAND);
+		}
+		else {
+			if (add_spacer) {
+				sizer_rightview->AddSpacer(1);
+			}
+			add_spacer = true;
+			tick_view_ = new zqdb::TickView(this);
+			sizer_rightview->Add(tick_view_, 1, wxEXPAND);
+		}
+		sh->AddSpacer(1);
+		sh->Add(sizer_rightview, 0, wxEXPAND);
+	}
+
 	s->Add(sh, 1, wxEXPAND);
 
 	s->Add(m_bookCtrl, 0, wxEXPAND);
@@ -843,7 +926,7 @@ int MyFrame::FilterEvent(wxEvent& event)
 				//	event.Skip();
 				//} break;
 				default: {
-					if (isalnum(key_code)) {
+					if (std::isalnum(key_code)) {
 						auto dlg = wxGetApp().GetSmartKBDlg();
 						if (dlg) {
 							dlg->ShowFor(this, key_code);
@@ -891,6 +974,21 @@ void MyFrame::OnSkinInfoChanged()
 	code_list_code_render_->SetSkinInfo(skin_info_ptr_);
 	code_list_name_render_->SetSkinInfo(skin_info_ptr_);
 	m_tv->SetSkinInfo(skin_info_ptr_);
+	if (title_view_) {
+		title_view_->SetSkinInfo(skin_info_ptr_);
+	}
+	if (mmp_view_) {
+		mmp_view_->SetSkinInfo(skin_info_ptr_);
+	}
+	if (trade_view_) {
+		trade_view_->SetSkinInfo(skin_info_ptr_);
+	}
+	if (info_view_) {
+		info_view_->SetSkinInfo(skin_info_ptr_);
+	}
+	if (tick_view_) {
+		tick_view_->SetSkinInfo(skin_info_ptr_);
+	}
 	//m_togglePanels->SetBackgroundColour(skin_info_ptr_->crXYLine);
 	/*Broadcast(this, [this](wxWindow* child) {
 		if (child != m_tv && child != m_ribbon) {
@@ -935,6 +1033,21 @@ void MyFrame::OnCurItemChanged()
 	SetTitle(title);
 	code_list_->Select(code_list_model_->GetItem(pos));
 	tv->SetCalcData(data);
+	if (title_view_) {
+		title_view_->SetHandle(h);
+	}
+	if (mmp_view_) {
+		mmp_view_->SetHandle(h);
+	}
+	if (trade_view_) {
+		trade_view_->SetHandle(h);
+	}
+	if (info_view_) {
+		info_view_->SetHandle(h);
+	}
+	if (tick_view_) {
+		tick_view_->SetHandle(h);
+	}
 
 	auto info = GetInfo();
 	size_t i = 0, j = record_list_.size();
@@ -1101,6 +1214,21 @@ void MyFrame::DoViewNotifyEnable(HZQDB h)
 {
 	auto tv = (zqdb::TechView*)m_tv; 
 	tv->OnNotifyEnable(h);
+	if (title_view_) {
+		title_view_->OnNotifyEnable(h);
+	}
+	if (mmp_view_) {
+		mmp_view_->OnNotifyEnable(h);
+	}
+	if (trade_view_) {
+		trade_view_->OnNotifyEnable(h);
+	}
+	if (info_view_) {
+		info_view_->OnNotifyEnable(h);
+	}
+	if (tick_view_) {
+		tick_view_->OnNotifyEnable(h);
+	}
 	auto book_page = m_bookCtrl->GetCurrentPage();
 	if (book_page == order_list_ && ZQDBGetParent(h_) == h) {
 		zqdb::AllOrder orders(h_);
@@ -1112,6 +1240,21 @@ void MyFrame::DoViewNotifyDisable(HZQDB h)
 {
 	auto tv = (zqdb::TechView*)m_tv;
 	tv->OnNotifyDisable(h);
+	if (title_view_) {
+		title_view_->OnNotifyDisable(h);
+	}
+	if (mmp_view_) {
+		mmp_view_->OnNotifyDisable(h);
+	}
+	if (trade_view_) {
+		trade_view_->OnNotifyDisable(h);
+	}
+	if (info_view_) {
+		info_view_->OnNotifyDisable(h);
+	}
+	if (tick_view_) {
+		tick_view_->OnNotifyDisable(h);
+	}
 	auto book_page = m_bookCtrl->GetCurrentPage();
 	if (book_page == order_list_ && ZQDBGetParent(h_) == h) {
 		order_list_model_->Clear();
@@ -1122,18 +1265,63 @@ void MyFrame::DoViewNotifyAppend(HZQDB h)
 {
 	auto tv = (zqdb::TechView*)m_tv;
 	tv->OnNotifyAppend(h);
+	if (title_view_) {
+		title_view_->OnNotifyAppend(h);
+	}
+	if (mmp_view_) {
+		mmp_view_->OnNotifyAppend(h);
+	}
+	if (trade_view_) {
+		trade_view_->OnNotifyAppend(h);
+	}
+	if (info_view_) {
+		info_view_->OnNotifyAppend(h);
+	}
+	if (tick_view_) {
+		tick_view_->OnNotifyAppend(h);
+	}
 }
 
 void MyFrame::DoViewNotifyRemove(HZQDB h)
 {
 	auto tv = (zqdb::TechView*)m_tv;
 	tv->OnNotifyRemove(h);
+	if (title_view_) {
+		title_view_->OnNotifyRemove(h);
+	}
+	if (mmp_view_) {
+		mmp_view_->OnNotifyRemove(h);
+	}
+	if (trade_view_) {
+		trade_view_->OnNotifyRemove(h);
+	}
+	if (info_view_) {
+		info_view_->OnNotifyRemove(h);
+	}
+	if (tick_view_) {
+		tick_view_->OnNotifyRemove(h);
+	}
 }
 
 void MyFrame::DoViewNotifyUpdate(HZQDB h)
 {
 	auto tv = (zqdb::TechView*)m_tv;
 	tv->OnNotifyUpdate(h);
+	if (title_view_) {
+		title_view_->OnNotifyUpdate(h);
+	}
+	if (mmp_view_) {
+		mmp_view_->OnNotifyUpdate(h);
+	}
+	if (trade_view_) {
+		trade_view_->OnNotifyUpdate(h);
+	}
+	if (info_view_) {
+		info_view_->OnNotifyUpdate(h);
+	}
+	if (tick_view_) {
+		tick_view_->OnNotifyUpdate(h);
+	}
 	auto book_page = m_bookCtrl->GetCurrentPage();
 	if (book_page == order_list_ && h->type == ZQDB_HANDLE_TYPE_ORDER) {
 		order_list_->Refresh();

@@ -134,6 +134,14 @@ protected:
 		wxDECLARE_EVENT_TABLE();
 		wxDECLARE_NO_COPY_CLASS(EventHandler);
 	};*/
+
+	//topview or rightview
+	zqdb::TitleView* title_view_ = nullptr;
+	zqdb::MmpView* mmp_view_ = nullptr;
+	zqdb::TradeView* trade_view_ = nullptr;
+	zqdb::InfoView* info_view_ = nullptr;
+	zqdb::TickView* tick_view_ = nullptr;
+
 	wxTimer timer_;
 public:
     MyFrame(const char* xml, size_t xmlflag);
