@@ -89,6 +89,7 @@ wxDECLARE_EVENT(SMARTKB_SEARCH_RESULT_EVENT, wxCommandEvent);
 class SmartKBListModel : public wxDataViewVirtualListModel, public SmartKB
 {
 private:
+	std::string type_ = ""; //默认全局SmartKB
 	wxEvtHandler* notify_ = nullptr;
 	std::vector<SmartKBItem> results_;
 public:
@@ -102,6 +103,9 @@ public:
 
 	SmartKBListModel();
 
+	//更新所有数据列表
+	void ClearAll();
+	void UpdateAll();
 	//搜索
 	bool Search(wxEvtHandler* notify, const wxString& strKey, int flag = 0);
 	//通知搜索结束

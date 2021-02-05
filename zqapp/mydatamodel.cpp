@@ -325,6 +325,16 @@ wxDEFINE_EVENT(SMARTKB_SEARCH_RESULT_EVENT, wxCommandEvent);
 SmartKBListModel::SmartKBListModel() :
 	wxDataViewVirtualListModel()
 {
+	UpdateAll();
+}
+
+void SmartKBListModel::ClearAll()
+{
+	SmartKB::Clear(type_);
+}
+
+void SmartKBListModel::UpdateAll()
+{
 	zqdb::AllExchange allexchange;
 	for (auto h : allexchange)
 	{
@@ -335,7 +345,7 @@ SmartKBListModel::SmartKBListModel() :
 		one.Name = zqdb::utf8_to_unicode(info->Name);
 		one.Type = 0;
 		one.Data = h;
-		Add("", &one, 1);
+		Add(type_, &one, 1);
 	}
 	zqdb::AllProduct allproduct;
 	for (auto h : allproduct)
@@ -347,7 +357,7 @@ SmartKBListModel::SmartKBListModel() :
 		one.Name = zqdb::utf8_to_unicode(info->Name);
 		one.Type = 0;
 		one.Data = h;
-		Add("", &one, 1);
+		Add(type_, &one, 1);
 	}
 	zqdb::AllCode allcode;
 	for (auto h : allcode)
@@ -359,9 +369,9 @@ SmartKBListModel::SmartKBListModel() :
 		one.Name = zqdb::utf8_to_unicode(info->Name);
 		one.Type = 0;
 		one.Data = h;
-		Add("", &one, 1);
+		Add(type_, &one, 1);
 	}
-	Select("");
+	Select(type_);
 }
 
 bool SmartKBListModel::Search(wxEvtHandler* notify, const wxString& strKey, int flag)

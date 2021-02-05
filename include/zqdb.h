@@ -787,8 +787,10 @@ ZQDB_API_EXPORT MDB_STATUS ZQDBGetFieldAsStr(HZQDB h, MDB_FIELD* field, size_t f
 
 ZQDB_API_EXPORT void ZQDBUpdateMarketData(HZQDB h, MDB_FIELD* fields, size_t field_num, CODEINFO* data);
 
-ZQDB_API_EXPORT void ZQDBAddTickData(HZQDB h, MDB_FIELD* field, size_t field_num, const TICK* data, size_t max_count);
-ZQDB_API_EXPORT void ZQDBAddKData(HZQDB h, PERIODTYPE cycle, MDB_FIELD* field, size_t field_num, const KDATA* data, size_t max_count);
+ZQDB_API_EXPORT void ZQDBUpdateOrInitTickData(HZQDB h, MDB_FIELD* field, size_t field_num, const TICK* data, size_t max_count);
+ZQDB_API_EXPORT void ZQDBUpdateOrInitKData(HZQDB h, PERIODTYPE cycle, MDB_FIELD* field, size_t field_num, const KDATA* data, size_t max_count);
+ZQDB_API_EXPORT void ZQDBAddTickData(HZQDB h, const TICK* data);
+ZQDB_API_EXPORT void ZQDBAddKData(HZQDB h, PERIODTYPE cycle, const KDATA* data);
 ZQDB_API_EXPORT void ZQDBUpdateKData(HZQDB h, PERIODTYPE cycle, MDB_FIELD* field, size_t field_num, const KDATA* data);
 
 ZQDB_API_EXPORT size_t ZQDBGetDataAttrCount(HZQDB h, PERIODTYPE cycle, size_t cycleex);
@@ -1136,8 +1138,10 @@ namespace zqdb {
 		
 		void UpdateMarketData(MDB_FIELD* fields, size_t field_num, CODEINFO* data) { ZQDBUpdateMarketData(h_, fields, field_num, data); }
 
-		void AddTickData(MDB_FIELD* field, size_t field_num, const TICK* data, size_t max_count) { ZQDBAddTickData(h_, field, field_num, data, max_count); }
-		void AddKData(PERIODTYPE cycle, MDB_FIELD* field, size_t field_num, const KDATA* data, size_t max_count) { ZQDBAddKData(h_, cycle, field, field_num, data, max_count); }
+		void UpdateOrInitTickData(MDB_FIELD* field, size_t field_num, const TICK* data, size_t max_count) { ZQDBUpdateOrInitTickData(h_, field, field_num, data, max_count); }
+		void UpdateOrInitKData(PERIODTYPE cycle, MDB_FIELD* field, size_t field_num, const KDATA* data, size_t max_count) { ZQDBUpdateOrInitKData(h_, cycle, field, field_num, data, max_count); }
+		void AddTickData(const TICK* data) { ZQDBAddTickData(h_, data); }
+		void AddKData(PERIODTYPE cycle, const KDATA* data) { ZQDBAddKData(h_, cycle, data); }
 		void UpdateKData(PERIODTYPE cycle, MDB_FIELD* field, size_t field_num, const KDATA* data) { ZQDBUpdateKData(h_, cycle, field, field_num, data); }
 
 		size_t GetDataMaxCount(PERIODTYPE cycle, size_t cycleex) { return ZQDBGetDataMaxCount(h_, cycle, cycleex); }

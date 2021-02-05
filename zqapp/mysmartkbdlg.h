@@ -47,6 +47,7 @@ protected:
 
 	void Activate(const wxDataViewItem& item);
 	void OnActivated(wxDataViewEvent &event);
+	void OnNotify(wxCommandEvent& event);
 
 	void OnActivate(wxActivateEvent& event);
 	void OnOK(wxCommandEvent& event);

@@ -564,6 +564,7 @@ void SmartKB::Add(const std::string& strType, SmartKBItem *pData, int nCount)
 void SmartKB::Clear(const std::string& strType)
 {
 	all_items_.erase(strType);
+	input_items_.reset();
 }
 
 bool SmartKB::Select(const std::string& strType)

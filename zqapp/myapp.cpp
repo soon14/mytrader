@@ -578,6 +578,9 @@ void MyApp::OnNotify(wxCommandEvent& event)
 {
 	ZQDBUpdateCalc();
 
+	if (smartkbdlg_) {
+		smartkbdlg_->GetEventHandler()->ProcessEvent(event);
+	}
 	for (auto frame : frames_) {
 		frame->GetEventHandler()->ProcessEvent(event);
 	}

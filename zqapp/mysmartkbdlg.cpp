@@ -76,6 +76,11 @@ MySmartKBDlg::MySmartKBDlg()
 
 	Bind(SMARTKB_SEARCH_RESULT_EVENT, &MySmartKBDlg::OnSearchResult, this);
 	Bind(wxEVT_DATAVIEW_ITEM_ACTIVATED, &MySmartKBDlg::OnActivated, this);
+	Bind(ZQDB_NOTIFY_ENABLE_EVENT, &MySmartKBDlg::OnNotify, this);
+	Bind(ZQDB_NOTIFY_DISABLE_EVENT, &MySmartKBDlg::OnNotify, this);
+	Bind(ZQDB_NOTIFY_APPEND_EVENT, &MySmartKBDlg::OnNotify, this);
+	Bind(ZQDB_NOTIFY_REMOVE_EVENT, &MySmartKBDlg::OnNotify, this);
+	Bind(ZQDB_NOTIFY_UPDATE_EVENT, &MySmartKBDlg::OnNotify, this);
 }
 
 MySmartKBDlg::~MySmartKBDlg()
@@ -266,6 +271,34 @@ void MySmartKBDlg::OnActivate(wxActivateEvent &event)
 		//
 	} else {
 		Show(false);
+	}
+}
+
+void MySmartKBDlg::OnNotify(wxCommandEvent& event)
+{
+	auto h = (HZQDB)event.GetClientData();
+	if (h) {
+		auto evt_type = event.GetEventType();
+		if (evt_type == ZQDB_NOTIFY_ENABLE_EVENT)
+		{
+			ctrl_list_model_->UpdateAll();
+		}
+		else if (evt_type == ZQDB_NOTIFY_DISABLE_EVENT)
+		{
+			ctrl_list_model_->ClearAll();
+		}
+		/*else if (evt_type == ZQDB_NOTIFY_APPEND_EVENT)
+		{
+			
+		}
+		else if (evt_type == ZQDB_NOTIFY_REMOVE_EVENT)
+		{
+			
+		}
+		else if (evt_type == ZQDB_NOTIFY_UPDATE_EVENT)
+		{
+			
+		}*/
 	}
 }
 
